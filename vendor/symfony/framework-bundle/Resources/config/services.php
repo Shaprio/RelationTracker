@@ -157,6 +157,7 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 new Parameter('kernel.secret'),
             ])
+            ->lazy()
         ->alias(UriSigner::class, 'uri_signer')
 
         ->set('config_cache_factory', ResourceCheckerConfigCacheFactory::class)
