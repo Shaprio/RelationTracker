@@ -1,0 +1,29 @@
+security:
+    # Haszowanie haseł
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+
+        main:
+          
+            pattern: ^/
+            form_login:
+                login_path: login          # adres, który wyświetla formularz (GET)
+                check_path: login          # ten sam adres obsługuje POST
+                default_target_path: /mainPage  # po zalogowaniu przekierowanie do /mainPage
+            logout:
+                path: logout    # pozwala wylogować się np. /logout
+
+
+    access_control:
+       
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
+        

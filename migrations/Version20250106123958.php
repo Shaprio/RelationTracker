@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20241223131408 extends AbstractMigration
+final class Version20250106123958 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -34,9 +34,11 @@ final class Version20241223131408 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_40374F40518D29D6 ON reminder (contact_r_id)');
         $this->addSql('CREATE INDEX IDX_40374F4066B9E782 ON reminder (event_r_id)');
         $this->addSql('COMMENT ON COLUMN reminder.created_at IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE setting (id SERIAL NOT NULL, useruser_s_id INT DEFAULT NULL, notifications BOOLEAN NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE setting (id SERIAL NOT NULL, useruser_s_id INT DEFAULT NULL, user_id INT NOT NULL, notifications BOOLEAN NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_9F74B898750221E5 ON setting (useruser_s_id)');
-        $this->addSql('CREATE TABLE "user" (id SERIAL NOT NULL, email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_9F74B898A76ED395 ON setting (user_id)');
+        $this->addSql('CREATE TABLE "user" (id SERIAL NOT NULL, email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, roles JSON NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D649E7927C74 ON "user" (email)');
         $this->addSql('COMMENT ON COLUMN "user".created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('ALTER TABLE contact ADD CONSTRAINT FK_4C62E638291A82DC FOREIGN KEY (user_name_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE event ADD CONSTRAINT FK_3BAE0AA7CE3D88C6 FOREIGN KEY (user_e_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
@@ -46,6 +48,7 @@ final class Version20241223131408 extends AbstractMigration
         $this->addSql('ALTER TABLE reminder ADD CONSTRAINT FK_40374F40518D29D6 FOREIGN KEY (contact_r_id) REFERENCES contact (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE reminder ADD CONSTRAINT FK_40374F4066B9E782 FOREIGN KEY (event_r_id) REFERENCES event (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE setting ADD CONSTRAINT FK_9F74B898750221E5 FOREIGN KEY (useruser_s_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE setting ADD CONSTRAINT FK_9F74B898A76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
     }
 
     public function down(Schema $schema): void
@@ -60,6 +63,7 @@ final class Version20241223131408 extends AbstractMigration
         $this->addSql('ALTER TABLE reminder DROP CONSTRAINT FK_40374F40518D29D6');
         $this->addSql('ALTER TABLE reminder DROP CONSTRAINT FK_40374F4066B9E782');
         $this->addSql('ALTER TABLE setting DROP CONSTRAINT FK_9F74B898750221E5');
+        $this->addSql('ALTER TABLE setting DROP CONSTRAINT FK_9F74B898A76ED395');
         $this->addSql('DROP TABLE contact');
         $this->addSql('DROP TABLE event');
         $this->addSql('DROP TABLE event_contact');

@@ -1,0 +1,13 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: "API Documentation"
+            description: "Opis Twojego API"
+            version: "1.0.0"
+        servers:
+            - url: 'http://localhost:8000'
+
+    areas:
+        default:
+            path_patterns: ['^/']
+

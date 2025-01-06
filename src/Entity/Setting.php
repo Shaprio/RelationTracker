@@ -19,6 +19,10 @@ class Setting
     #[ORM\Column]
     private ?bool $notifications = null;
 
+    #[ORM\OneToOne(inversedBy: 'setting')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
+
     public function getId(): ?int
     {
         return $this->id;
