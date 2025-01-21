@@ -4,149 +4,117 @@
     <meta charset="UTF-8">
     <title>Register</title>
     <style>
-        /* Prosty reset marginesów/paddingu */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: Arial, sans-serif;
-            min-height: 100vh;
             display: flex;
-            flex-direction: row;
-        }
-
-        .container {
-            display: flex;
-            width: 100%;
-        }
-
-        /* Lewa kolumna */
-        .left-column {
-            background-color: #f5f5f5;
-            width: 40%;
+            justify-content: space-between;
+            align-items: center;
             padding: 2rem;
+            height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+        .left-section {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            width: 50%;
+            text-align: center;
         }
-
         .logo {
-            width: 150px; /* tu wstaw szerokość docelowego logo */
-            height: 150px; /* wysokość docelowego logo */
-            background-color: #ccc; /* placeholder, dopóki nie masz rzeczywistego obrazka */
-            border-radius: 50%;
-            margin-bottom: 2rem;
+            width: 200px;
+            height: 150px;
+            background-color: #ccc;
+            margin-bottom: 1rem;
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: center;
             font-weight: bold;
         }
-
-        .login-btn {
-            display: inline-block;
-            text-decoration: none;
-            padding: 0.8rem 1.2rem;
-            background-color: #1E3A5F; /* ciemnoniebieski */
-            color: #fff;
-            border-radius: 4px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .login-btn:hover {
-            background-color: #274b7a;
-        }
-
-        /* Prawa kolumna */
-        .right-column {
-            width: 60%;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .form-container {
-            max-width: 400px;
-            margin: 0 auto; /* centrowanie */
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        h1 {
+        .left-section h1 {
+            font-size: 2.5rem;
             margin-bottom: 1rem;
         }
-
+        .login-button {
+            background-color: #1E3A5F;
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        .login-button:hover {
+            background-color: #3b5c87;
+        }
+        .right-section {
+            width: 40%;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .right-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
         label {
+            display: block;
+            margin-bottom: 0.5rem;
             font-weight: bold;
         }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
+        input {
             width: 100%;
-            padding: 0.6rem;
+            padding: 0.8rem;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-
-        .register-btn {
-            padding: 0.8rem 1.2rem;
-            background-color: #76B6F8; /* jasno-niebieski */
-            color: #000;
+        .register-button {
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
             border: none;
+            padding: 0.8rem;
             border-radius: 4px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-
-        .register-btn:hover {
-            background-color: #5ea0e6;
+        .register-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- Lewa kolumna z logo i przyciskiem login -->
-    <div class="left-column">
-        <!-- Tymczasowy placeholder na logo -->
-        <div class="logo">
-            LOGO
+<div class="left-section">
+    <div class="logo">TEMP LOGO</div>
+    <h1>Register</h1>
+    <a href="{{ path('login') }}" class="login-button">Log In</a>
+</div>
+<div class="right-section">
+    <h2>Register</h2>
+    <form action="{{ path('register') }}" method="POST">
+        <div class="form-group">
+            <label for="login">Login</label>
+            <input type="text" id="login" name="login" required>
         </div>
-        <!-- Link (lub button) przenoszący do strony logowania -->
-        <a href="{{ path('login') }}" class="login-btn">Login</a>
-    </div>
-
-    <!-- Prawa kolumna z formularzem rejestracji -->
-    <div class="right-column">
-        <div class="form-container">
-            <h1>Register</h1>
-            <form method="post" action="{{ path('register_submit') }}">
-                <div>
-                    <label for="name">Name:</label><br/>
-                    <input type="text" id="name" name="name" required>
-                </div>
-
-                <div>
-                    <label for="email">Email:</label><br/>
-                    <input type="email" id="email" name="email" required>
-                </div>
-
-                <div>
-                    <label for="password">Password:</label><br/>
-                    <input type="password" id="password" name="password" required>
-                </div>
-
-                <button type="submit" class="register-btn">Register</button>
-            </form>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required>
         </div>
-    </div>
+        <div class="form-group">
+            <label for="repeat-email">Repeat Email Address</label>
+            <input type="email" id="repeat-email" name="repeat_email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="register-button">Sign Up</button>
+    </form>
 </div>
 </body>
 </html>

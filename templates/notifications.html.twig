@@ -1,12 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Notifications</title>
+    <meta charset="UTF-8">
+    <title>Dashboard - Notifications</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        .sidebar {
+            width: 15%;
+            background-color: #1E3A5F;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #fff;
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar a:hover {
+            background-color: #3b5c87;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            background-color: #FF6666;
+            padding: 0.8rem 1rem;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .notification-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item {
+            background-color: #76B6F8;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-<h1>Notifications</h1>
-<p>Here you can view your notifications.</p>
+<div class="sidebar">
+    <a href="#">Dashboard</a>
+    <a href="#">Meetings</a>
+    <a href="#">Friends</a>
+    <a href="#">Notification</a>
+    <a href="#">Settings</a>
+    <a href="#" class="logout">Logout</a>
+</div>
+
+<div class="content">
+    <div class="header">
+        <h1>Notifications</h1>
+        <img src="https://via.placeholder.com/40" alt="User Profile">
+    </div>
+
+    <div class="notification-list">
+        <div class="notification-item">Notification 1: Meeting at 10 AM</div>
+        <div class="notification-item">Notification 2: Project deadline tomorrow</div>
+        <div class="notification-item">Notification 3: Lunch with Anna</div>
+        <div class="notification-item">Notification 4: Gym session at 6 PM</div>
+    </div>
+</div>
 </body>
 </html>
-
-

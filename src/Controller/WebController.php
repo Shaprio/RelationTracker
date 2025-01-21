@@ -40,8 +40,8 @@ class WebController extends AbstractController
     #[Route('/mainPage', name: 'mainPage')]
     public function mainPage(): Response
     {
-        // Strona główna (po zalogowaniu) – przykładowo
-        return new Response('<h1>Welcome to the Main Page</h1>');
+        // Renderowanie szablonu mainPage
+        return $this->render('mainPage.html.twig');
     }
 
     #[Route('/register', name: 'register', methods: ['GET'])]
