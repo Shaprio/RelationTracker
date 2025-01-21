@@ -22,7 +22,7 @@ class WebController extends AbstractController
         return new Response('Admin content');
     }
 
-    #[Route('/login', name: 'login', methods: ['GET'])]
+    #[Route('/login', name: 'login', methods: ['GET' , 'POST'])]
     public function login(): Response
     {
         // Po prostu renderujemy formularz logowania
