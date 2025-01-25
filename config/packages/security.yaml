@@ -21,7 +21,11 @@ security:
                 default_target_path: /mainPage  # po zalogowaniu przekierowanie do /mainPage
             logout:
                 path: logout    # pozwala wylogować się np. /logout
-
+        
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
 
     access_control:
        

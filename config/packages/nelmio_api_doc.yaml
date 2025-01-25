@@ -1,13 +1,21 @@
 nelmio_api_doc:
     documentation:
         info:
-            title: "API Documentation"
-            description: "Opis Twojego API"
-            version: "1.0.0"
+            title: 'API Documentation'
+            description: 'API with JWT Authentication'
+            version: '1.0.0'
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT # Dodano dla większej czytelności
+        security:
+            - Bearer: [] # Domyślne zabezpieczenie dla wszystkich endpointów
         servers:
-            - url: 'http://localhost:8000'
+            - url: 'https://localhost' # URL serwera aplikacji
 
     areas:
         default:
-            path_patterns: ['^/']
+            path_patterns: ['^/'] # Obsługuj wszystkie ścieżki
 
