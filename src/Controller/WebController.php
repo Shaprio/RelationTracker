@@ -13,6 +13,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 use App\Entity\Contact;
+use App\Entity\Event;
+use App\Entity\EventContact;
 
 
 class WebController extends AbstractController
@@ -174,18 +176,87 @@ class WebController extends AbstractController
         return $this->redirectToRoute('login');
     }
 
-    #[Route('/meetings', name: 'meetings', methods: ['GET'])]
-    #[OA\Get(
-        path: '/meetings',
-        summary: 'Render meetings page',
-        responses: [
-            new OA\Response(response: 200, description: 'Meetings page rendered')
-        ]
-    )]
-    public function meetings(): Response
-    {
-        return $this->render('meetings.html.twig');
+    #[Route('/meetings', name: 'meetings', methods: ['GET', 'POST'])]
+    public function meetings(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('login');
+        }
+
+        // Pobieranie wydarzeń użytkownika
+        $events = $entityManager->getRepository(Event::class)->findBy(['userE' => $user]);
+        $contacts = $entityManager->getRepository(Contact::class)->findBy(['userName' => $user]);
+
+        if ($request->isMethod('POST')) {
+            $eventId = $request->request->get('event_id');
+            $title = $request->request->get('title');
+            $description = $request->request->get('description');
+            $date = $request->request->get('date');
+            $selectedContacts = $request->request->all('contacts') ?? [];
+
+            if ($eventId) {
+                // Edycja istniejącego wydarzenia
+                $event = $entityManager->getRepository(Event::class)->find($eventId);
+
+                if ($event && $event->getUserE() === $user) {
+                    $event->setTitle($title);
+                    $event->setDescription($description);
+                    $event->setDate(new \DateTime($date));
+                    $event->setUpdateAt(new \DateTime());
+
+                    // Aktualizacja kontaktów
+                    foreach ($event->getContact() as $eventContact) {
+                        $entityManager->remove($eventContact);
+                    }
+                    foreach ($selectedContacts as $contactId) {
+                        $contact = $entityManager->getRepository(Contact::class)->find($contactId);
+                        if ($contact) {
+                            $eventContact = new EventContact();
+                            $eventContact->setEvent($event);
+                            $eventContact->setContact($contact);
+                            $entityManager->persist($eventContact);
+                        }
+                    }
+
+                    $entityManager->flush();
+                }
+            } else {
+                // Dodawanie nowego wydarzenia
+                $event = new Event();
+                $event->setUserE($user);
+                $event->setTitle($title);
+                $event->setDescription($description);
+                $event->setDate(new \DateTime($date));
+                $event->setCreatedAt(new \DateTimeImmutable());
+                $event->setUpdateAt(new \DateTime());
+                $entityManager->persist($event);
+
+                foreach ($selectedContacts as $contactId) {
+                    $contact = $entityManager->getRepository(Contact::class)->find($contactId);
+                    if ($contact) {
+                        $eventContact = new EventContact();
+                        $eventContact->setEvent($event);
+                        $eventContact->setContact($contact);
+                        $entityManager->persist($eventContact);
+                    }
+                }
+
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute('meetings');
+        }
+
+        return $this->render('meetings.html.twig', [
+            'events' => $events,
+            'contacts' => $contacts,
+        ]);
     }
+
 
     #[Route('/friends', name: 'friends', methods: ['GET', 'POST'])]
     public function friends(Request $request, EntityManagerInterface $entityManager): Response

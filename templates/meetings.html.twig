@@ -68,6 +68,20 @@
             border-radius: 50%;
         }
 
+        .header button {
+            padding: 0.6rem 1rem;
+            background-color: #1E3A5F;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .header button:hover {
+            background-color: #3b5c87;
+        }
+
         .meeting-list {
             background-color: #f5f5f5;
             padding: 1rem;
@@ -85,6 +99,86 @@
             border-radius: 4px;
             font-weight: bold;
             text-align: center;
+            position: relative;
+        }
+
+        .meeting-item button {
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: white;
+            color: #76B6F8;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .meeting-item button:hover {
+            background-color: #fff;
+            color: #3b5c87;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 30%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            font-size: 1.5rem;
+        }
+
+        .modal form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal input, .modal textarea, .modal select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .modal button {
+            padding: 0.5rem;
+            background-color: #1E3A5F;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background-color: #3b5c87;
         }
     </style>
 </head>
@@ -101,16 +195,93 @@
 <div class="content">
     <div class="header">
         <h1>Meetings</h1>
-        <img src="https://via.placeholder.com/40" alt="User Profile">
+        <button id="addEventBtn">Add New Event</button>
     </div>
 
     <div class="meeting-list">
-        <div class="meeting-item">Meeting 1</div>
-        <div class="meeting-item">Meeting 2</div>
-        <div class="meeting-item">Meeting 3</div>
-        <div class="meeting-item">Meeting 4</div>
+        {% for event in events %}
+            <div class="meeting-item">
+                <p>Title: {{ event.title }}</p>
+                <p>Description: {{ event.description }}</p>
+                <p>Date: {{ event.date|date('Y-m-d') }}</p>
+                <p>Contacts:
+                    {% for contact in event.contact %}
+                        {{ contact.contact.name }},
+                    {% endfor %}
+                </p>
+                <button class="editEventBtn" data-id="{{ event.id }}">Edit</button>
+            </div>
+        {% endfor %}
     </div>
 </div>
+
+<!-- Modal -->
+<div class="modal" id="eventModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add Event</h2>
+            <button class="modal-close" id="closeModal">&times;</button>
+        </div>
+        <form method="POST" action="/meetings">
+            <input type="hidden" name="event_id" id="eventId">
+            <input type="text" name="title" id="eventTitle" placeholder="Title" required>
+            <textarea name="description" id="eventDescription" placeholder="Description"></textarea>
+            <input type="date" name="date" id="eventDate" required>
+            <label>Contacts:</label>
+            <select name="contacts[]" id="eventContacts" multiple>
+                {% for contact in contacts %}
+                    <option value="{{ contact.id }}">{{ contact.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('eventModal');
+    const addEventBtn = document.getElementById('addEventBtn');
+    const closeModal = document.getElementById('closeModal');
+    const editEventBtns = document.querySelectorAll('.editEventBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const eventId = document.getElementById('eventId');
+    const eventTitle = document.getElementById('eventTitle');
+    const eventDescription = document.getElementById('eventDescription');
+    const eventDate = document.getElementById('eventDate');
+    const eventContacts = document.getElementById('eventContacts');
+
+    addEventBtn.addEventListener('click', () => {
+        modalTitle.textContent = 'Add Event';
+        eventId.value = '';
+        eventTitle.value = '';
+        eventDescription.value = '';
+        eventDate.value = '';
+        eventContacts.value = '';
+        modal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    editEventBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            modalTitle.textContent = 'Edit Event';
+            const id = btn.dataset.id;
+
+            eventId.value = id;
+            eventTitle.value = btn.parentElement.querySelector('p:nth-of-type(1)').textContent.split(': ')[1];
+            eventDescription.value = btn.parentElement.querySelector('p:nth-of-type(2)').textContent.split(': ')[1];
+            eventDate.value = btn.parentElement.querySelector('p:nth-of-type(3)').textContent.split(': ')[1];
+            modal.style.display = 'flex';
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+</script>
 </body>
 </html>
-
