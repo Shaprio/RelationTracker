@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
+use App\Entity\Contact;
+
 
 class WebController extends AbstractController
 {
@@ -185,18 +187,62 @@ class WebController extends AbstractController
         return $this->render('meetings.html.twig');
     }
 
-    #[Route('/friends', name: 'friends', methods: ['GET'])]
-    #[OA\Get(
-        path: '/friends',
-        summary: 'Render friends page',
-        responses: [
-            new OA\Response(response: 200, description: 'Friends page rendered')
-        ]
-    )]
-    public function friends(): Response
+    #[Route('/friends', name: 'friends', methods: ['GET', 'POST'])]
+    public function friends(Request $request, EntityManagerInterface $entityManager): Response
     {
-        return $this->render('friends.html.twig');
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('login');
+        }
+
+        // Pobieranie kontaktów użytkownika
+        $contacts = $entityManager->getRepository(Contact::class)->findBy(['userName' => $user]);
+
+        if ($request->isMethod('POST')) {
+            $contactId = $request->request->get('contact_id');
+            $name = $request->request->get('name');
+            $email = $request->request->get('email');
+            $phone = $request->request->get('phone');
+            $birthday = $request->request->get('birthday'); // Pobranie daty urodzin
+            $note = $request->request->get('note');
+
+            if ($contactId) {
+                // Edycja istniejącego kontaktu
+                $contact = $entityManager->getRepository(Contact::class)->find($contactId);
+                if ($contact && $contact->getUserName() === $user) {
+                    $contact->setName($name);
+                    $contact->setEmailC($email);
+                    $contact->setPhone($phone);
+                    $contact->setBirthday($birthday ? new \DateTime($birthday) : null); // Konwersja daty na obiekt DateTime
+                    $contact->setNote($note);
+                    $contact->setUpdateAt(new \DateTime());
+                    $entityManager->flush();
+                }
+            } else {
+                // Dodawanie nowego kontaktu
+                $contact = new Contact();
+                $contact->setUserName($user);
+                $contact->setName($name);
+                $contact->setEmailC($email);
+                $contact->setPhone($phone);
+                $contact->setBirthday($birthday ? new \DateTime($birthday) : null); // Konwersja daty na obiekt DateTime
+                $contact->setNote($note);
+                $contact->setCreatedAt(new \DateTimeImmutable());
+                $contact->setUpdateAt(new \DateTime());
+                $entityManager->persist($contact);
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute('friends');
+        }
+
+        return $this->render('friends.html.twig', [
+            'contacts' => $contacts,
+        ]);
     }
+
+
 
     #[Route('/notifications', name: 'notifications', methods: ['GET'])]
     #[OA\Get(

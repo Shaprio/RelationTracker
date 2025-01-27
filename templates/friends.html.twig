@@ -68,6 +68,19 @@
             border-radius: 50%;
         }
 
+        .header button {
+            padding: 0.6rem 1rem;
+            background-color: #1E3A5F;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .header button:hover {
+            background-color: #3b5c87;
+        }
+
         .friend-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -86,6 +99,85 @@
             font-weight: bold;
             text-align: center;
         }
+
+        .friend-item button {
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: white;
+            color: #76B6F8;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .friend-item button:hover {
+            background-color: #fff;
+            color: #3b5c87;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 30%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            font-size: 1.5rem;
+        }
+
+        .modal form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal input, .modal textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .modal button {
+            padding: 0.5rem;
+            background-color: #1E3A5F;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background-color: #3b5c87;
+        }
     </style>
 </head>
 <body>
@@ -101,21 +193,89 @@
 <div class="content">
     <div class="header">
         <h1>Friends</h1>
-        <img src="https://via.placeholder.com/40" alt="User Profile">
+        <button id="addContactBtn">Add New Contact</button>
     </div>
 
     <div class="friend-grid">
-        <div class="friend-item">Friend 1</div>
-        <div class="friend-item">Friend 1</div>
-        <div class="friend-item">Friend 1</div>
-        <div class="friend-item">Friend 1</div>
-        <div class="friend-item">Friend 1</div>
-        <div class="friend-item">Friend 1</div>
-        <div class="friend-item">Friend 1</div>
-        <div class="friend-item">Friend 1</div>
-        <div class="friend-item">Friend 1</div>
+        {% for contact in contacts %}
+            <div class="friend-item">
+                <p>Name: {{ contact.name }}</p>
+                <p>Email: {{ contact.emailC }}</p>
+                <p>Birthday: {{ contact.birthday|date('Y-m-d') }}</p>
+                <button class="editContactBtn" data-id="{{ contact.id }}">Edit</button>
+            </div>
+        {% endfor %}
     </div>
 </div>
+
+<!-- Modal -->
+<div class="modal" id="contactModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add Contact</h2>
+            <button class="modal-close" id="closeModal">&times;</button>
+        </div>
+        <form method="POST" action="/friends">
+            <input type="hidden" name="contact_id" id="contactId">
+            <input type="text" name="name" id="contactName" placeholder="Name" required>
+            <input type="email" name="email" id="contactEmail" placeholder="Email" required>
+            <input type="date" name="birthday" id="contactBirthday">
+            <input type="text" name="phone" id="contactPhone" placeholder="Phone">
+            <textarea name="note" id="contactNote" placeholder="Note"></textarea>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('contactModal');
+    const addContactBtn = document.getElementById('addContactBtn');
+    const closeModal = document.getElementById('closeModal');
+    const editContactBtns = document.querySelectorAll('.editContactBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const contactId = document.getElementById('contactId');
+    const contactName = document.getElementById('contactName');
+    const contactEmail = document.getElementById('contactEmail');
+    const contactBirthday = document.getElementById('contactBirthday');
+    const contactPhone = document.getElementById('contactPhone');
+    const contactNote = document.getElementById('contactNote');
+
+    addContactBtn.addEventListener('click', () => {
+        modalTitle.textContent = 'Add Contact';
+        contactId.value = '';
+        contactName.value = '';
+        contactEmail.value = '';
+        contactBirthday.value = '';
+        contactPhone.value = '';
+        contactNote.value = '';
+        modal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    editContactBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            modalTitle.textContent = 'Edit Contact';
+            const id = btn.dataset.id;
+
+            contactId.value = id;
+            contactName.value = btn.parentElement.querySelector('p:nth-of-type(1)').textContent.split(': ')[1];
+            contactEmail.value = btn.parentElement.querySelector('p:nth-of-type(2)').textContent.split(': ')[1];
+            contactBirthday.value = btn.parentElement.querySelector('p:nth-of-type(3)').textContent.split(': ')[1];
+            contactPhone.value = 'Fake Phone'; // Replace with actual data
+            contactNote.value = 'Fake Note'; // Replace with actual data
+
+            modal.style.display = 'flex';
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+</script>
 </body>
 </html>
-

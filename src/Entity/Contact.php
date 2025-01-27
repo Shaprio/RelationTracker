@@ -47,6 +47,9 @@ class Contact
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updateAt = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $name = null;
+
     /**
      * @var Collection<int, EventContact>
      */
@@ -190,6 +193,18 @@ class Contact
         return $this;
     }
 
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, EventContact>
      */
@@ -250,3 +265,4 @@ class Contact
         return $this;
     }
 }
+
