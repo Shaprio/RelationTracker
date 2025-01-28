@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use DateTimeInterface;
 
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
 class Contact
@@ -68,6 +69,8 @@ class Contact
     #[ORM\OneToMany(mappedBy: 'contact', targetEntity: Interaction::class, cascade: ['persist', 'remove'])]
     private Collection $interactions;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?DateTimeInterface $lastInteraction = null;
     public function __construct()
     {
         $this->eventC = new ArrayCollection();
@@ -283,6 +286,18 @@ class Contact
         }
         return $this;
     }
+
+    public function getLastInteraction(): ?DateTimeInterface
+    {
+        return $this->lastInteraction;
+    }
+
+    public function setLastInteraction(?DateTimeInterface $lastInteraction): self
+    {
+        $this->lastInteraction = $lastInteraction;
+        return $this;
+    }
+
 }
 
 

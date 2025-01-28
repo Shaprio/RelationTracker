@@ -2,8 +2,15 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <title>Dashboard - Main Page</title>
     <style>
+        /* Reset/bazowe style */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -11,7 +18,11 @@
             height: 100vh;
             background-color: #f9f9f9;
         }
+        h2, h3, p {
+            margin: 0;
+        }
 
+        /* Sidebar */
         .sidebar {
             width: 15%;
             background-color: #1E3A5F;
@@ -20,7 +31,6 @@
             flex-direction: column;
             padding: 1.5rem;
         }
-
         .sidebar a {
             text-decoration: none;
             color: #fff;
@@ -29,172 +39,253 @@
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            transition: background-color 0.2s;
         }
-
         .sidebar a:hover {
             background-color: #3b5c87;
         }
-
         .sidebar .logout {
             margin-top: auto;
             background-color: #FF6666;
+            text-align: center;
+            border-radius: 4px;
         }
 
+        /* Główna zawartość */
         .content {
             flex: 1;
-            padding: 2rem;
             display: flex;
             flex-direction: column;
+            padding: 2rem;
             gap: 2rem;
         }
 
-        .welcome {
-            background-color: #f5f5f5;
-            padding: 1.5rem;
-            border-radius: 8px;
+        /* Sekcja powitalna i statystyki */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .welcome-box {
             font-size: 1.5rem;
             font-weight: bold;
-            text-align: center;
         }
 
         .stats {
             display: flex;
-            gap: 1rem;
+            gap: 2rem;
+            margin-top: 1rem;
         }
-
         .stat-box {
             background-color: #f5f5f5;
-            padding: 1.5rem;
             border-radius: 8px;
+            padding: 1rem;
+            width: 7rem;
             text-align: center;
+        }
+        .stat-box h2 {
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
+        }
+        .stat-box p {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* Sekcja główna (dwie kolumny) */
+        .main-sections {
+            display: flex;
+            gap: 2rem;
             flex: 1;
         }
 
-        .details {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .notifications {
+        /* Lewa kolumna */
+        .left-column {
             flex: 2;
-            background-color: #f5f5f5;
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
-        .notification-item {
+        /* Karty (np. Birthdays, inne eventy, keep in touch) */
+        .card {
             background-color: #76B6F8;
             color: #fff;
+            border-radius: 8px;
             padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
+        }
+        .card h3 {
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            margin-bottom: 0.3rem;
         }
 
-        .notification-item h3 {
-            margin: 0;
-        }
-
-        .sidebar .logout {
-            margin-top: auto;
-            padding: 0.8rem 1rem;
-            text-align: center;
-            border-radius: 4px;
-            background-color: #FF6666;
-            color: #fff;
-        }
-
-        .calendar {
+        /* Prawa kolumna */
+        .right-column {
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
 
-        .create-event {
+        .create-event-btn {
             background-color: #1E3A5F;
             color: #fff;
-            padding: 1rem;
-            text-align: center;
+            border: none;
+            padding: 0.8rem 1.2rem;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .create-event-btn:hover {
+            background-color: #3b5c87;
         }
 
+        /* Kalendarz */
         .calendar-box {
             background-color: #f5f5f5;
-            padding: 1rem;
             border-radius: 8px;
-            flex: 1;
+            padding: 1rem;
+        }
+        .calendar-box h3 {
+            margin-bottom: 1rem;
         }
 
-        .event {
+        /* Dzisiejsze wydarzenia */
+        .today-events {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .today-events h3 {
+            margin-bottom: 1rem;
+        }
+        .event-tile {
             background-color: #76B6F8;
             color: #fff;
-            padding: 1rem;
+            padding: 0.5rem;
             border-radius: 4px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Wydarzenia w tym tygodniu i Birthday, Reconnect */
+        .item-list {
+            margin-top: 0.5rem;
+        }
+        .item-list .list-item {
+            background-color: rgba(255,255,255,0.2);
+            margin-bottom: 0.3rem;
+            padding: 0.5rem;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
 <div class="sidebar">
-    <a href="/mainPage">Dashboard</a>
+    <a href="/mainPage" class="active">Dashboard</a>
     <a href="/meetings">Meetings</a>
     <a href="/friends">Friends</a>
-    <a href="/notifications" class="active">Notifications</a>
+    <a href="/notifications">Notifications</a>
     <a href="/recurring-events">Recurring Events</a>
     <a href="/settings">Settings</a>
     <a href="/logout" class="logout">Logout</a>
 </div>
 
 <div class="content">
-    <div class="welcome">Hello Mark! It's good to see you again.</div>
+    <!-- Góra: powitanie + przycisk tworzenia eventu + statystyki -->
+    <div class="top-bar">
+        <div>
+            <div class="welcome-box">Hello, {{ app.user.name }}! It's good to see you again.</div>
+            <div class="stats">
+                <div class="stat-box">
+                    <h2>{{ eventsCountThisMonth|default('0') }}</h2>
+                    <p>Events this month</p>
+                </div>
+                <div class="stat-box">
+                    <h2>{{ organizerCount|default('0') }}</h2>
+                    <p>Organizer</p>
+                </div>
+                <div class="stat-box">
+                    <h2>{{ guestCount|default('0') }}</h2>
+                    <p>Guest</p>
+                </div>
+            </div>
+        </div>
 
-    <div class="stats">
-        <div class="stat-box">
-            <h2>11</h2>
-            <p>Events this month</p>
-        </div>
-        <div class="stat-box">
-            <h2>2</h2>
-            <p>Organizer</p>
-        </div>
-        <div class="stat-box">
-            <h2>9</h2>
-            <p>Guest</p>
-        </div>
+        <!-- Przycisk do tworzenia eventu (Placeholder) -->
+        <button class="create-event-btn">Create Event</button>
     </div>
 
-    <div class="details">
-        <div class="notifications">
-            <div class="notification-item">
-                <h3>Birthdays this month</h3>
-                <p>Louise - 18.04.2024</p>
-                <p>Brad - 30.04.2024</p>
+    <!-- Sekcja główna: lewa kolumna (kafelki) i prawa kolumna (calendar & today events) -->
+    <div class="main-sections">
+        <!-- Lewa kolumna -->
+        <div class="left-column">
+            <!-- Kafelek: Wydarzenia w tym tygodniu -->
+            <div class="card">
+                <h3>Events This Week</h3>
+                <div class="item-list">
+                    {% for e in eventsThisWeek %}
+                        <div class="list-item">{{ e.title }} — {{ e.date|date('Y-m-d H:i') }}</div>
+                    {% endfor %}
+                    {% for r in recurringThisWeek %}
+                        <div class="list-item">{{ r.title }} — {{ r.startDate|date('Y-m-d') }}</div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="notification-item">
-                <h3>Other</h3>
-                <p>Wedding anniversary - 22.04.2024</p>
+
+            <!-- Kafelek: Birthday Events This Month -->
+            <div class="card">
+                <h3>Birthday Events This Month</h3>
+                <div class="item-list">
+                    {% for b in birthdayEvents %}
+                        <div class="list-item">{{ b.title }} on {{ b.startDate|date('Y-m-d') }}</div>
+                    {% else %}
+                        <p>No birthdays this month.</p>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="notification-item">
-                <h3>Keep in touch</h3>
-                <p>Hey, it looks like you haven’t caught up with [Name1], [Name2], and [Name3] in over a month!</p>
+
+            <!-- Kafelek: Contacts to Reconnect -->
+            <div class="card">
+                <h3>Contacts to Reconnect</h3>
+                <div class="item-list">
+                    {% for c in staleContacts %}
+                        <div class="list-item">{{ c.name }} - Last interaction over a month ago</div>
+                    {% else %}
+                        <p>All contacts are up to date.</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
-        <div class="calendar">
-            <div class="create-event">Create Event</div>
+        <!-- Prawa kolumna -->
+        <div class="right-column">
+            <!-- Kalendarz (placeholder) -->
             <div class="calendar-box">
-                <h3>Today</h3>
-                <p>Dinner with Anna</p>
-                <p>Louise's birthday party</p>
+                <h3>April 11, 2024</h3>
+                <!-- Tu można wstawić mini-kalendarz JS/HTML lub cokolwiek planujesz -->
+                <p>(Placeholder for a calendar widget)</p>
+            </div>
+
+            <!-- Dzisiejsze wydarzenia -->
+            <div class="today-events">
+                <h3>Today's Events</h3>
+                {% for ev in todayEvents %}
+                    <div class="event-tile">
+                        {{ ev.title }} — {{ ev.date|date('H:i') }}
+                    </div>
+                {% else %}
+                    <p>No events today.</p>
+                {% endfor %}
             </div>
         </div>
     </div>
 </div>
 </body>
 </html>
-
 

@@ -117,16 +117,56 @@ class WebController extends AbstractController
     }
 
     #[Route('/mainPage', name: 'mainPage', methods: ['GET'])]
-    #[OA\Get(
-        path: '/mainPage',
-        summary: 'Render main page',
-        responses: [
-            new OA\Response(response: 200, description: 'Main page rendered')
-        ]
-    )]
-    public function mainPage(): Response
+    public function mainPage(EntityManagerInterface $entityManager): Response
     {
-        return $this->render('mainPage.html.twig');
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('login');
+        }
+
+        // 1. Meetingi (Event) w tym tygodniu
+        $eventsThisWeek = $entityManager
+            ->getRepository(Event::class)
+            ->findThisWeekForUser($user);
+
+        // 2. Recurring events w tym tygodniu
+        $recurringThisWeek = $entityManager
+            ->getRepository(RecurringEvent::class)
+            ->findThisWeekForUser($user);
+
+        // 3. Recurring events o tytule „Birthday” w tym miesiącu
+        $birthdayEvents = $entityManager
+            ->getRepository(RecurringEvent::class)
+            ->findBirthdaysThisMonth($user);
+
+        // 4. Kontakty, z którymi nie było interakcji ponad miesiąc
+        //    Załóżmy, że w ContactRepository (lub InteractionRepository)
+        //    masz metodę findStaleContacts(...).
+        $staleContacts = $entityManager
+            ->getRepository(Contact::class)
+            ->findStaleContacts($user);
+
+        // 5. Dzisiejsze wydarzenia (Meetings + RecurringEvents) - można scalić w jedną tablicę lub oddzielnie
+        $todayEvents = [];
+        // a) meetingi
+        $todayEventsMeetings = $entityManager
+            ->getRepository(Event::class)
+            ->findTodayForUser($user);
+        // b) recurring
+        $todayEventsRecurring = $entityManager
+            ->getRepository(RecurringEvent::class)
+            ->findTodayForUser($user);
+
+        // scalamy
+        $todayEvents = array_merge($todayEventsMeetings, $todayEventsRecurring);
+
+        return $this->render('mainPage.html.twig', [
+            'eventsThisWeek'      => $eventsThisWeek,
+            'recurringThisWeek'   => $recurringThisWeek,
+            'birthdayEvents'      => $birthdayEvents,
+            'staleContacts'       => $staleContacts,
+            'todayEvents'         => $todayEvents,
+        ]);
     }
 
     #[Route('/register', name: 'register', methods: ['GET'])]
@@ -328,18 +368,26 @@ class WebController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $contactId = $request->request->get('contact_id');
+        $contactId   = $request->request->get('contact_id');
         $initiatedBy = $request->request->get('initiatedBy'); // 'self' or 'friend'
 
         $contact = $entityManager->getRepository(Contact::class)->find($contactId);
 
         if ($contact && $contact->getUserName() === $user) {
+            // 1. Tworzymy nową Interakcję
             $interaction = new Interaction();
+            $interactionDate = new \DateTimeImmutable();
             $interaction->setContact($contact);
             $interaction->setInitiatedBy($initiatedBy);
-            $interaction->setInteractionDate(new \DateTimeImmutable());
+            $interaction->setInteractionDate($interactionDate);
 
+            // 2. Uzupełniamy pole lastInteraction w Contact
+            //    (np. data z Interaction)
+            $contact->setLastInteraction($interactionDate);
+
+            // 3. Zapisujemy w bazie
             $entityManager->persist($interaction);
+            // $entityManager->persist($contact); // nie zawsze konieczne, bo cascade lub flush
             $entityManager->flush();
 
             $this->addFlash('success', 'Interaction logged successfully!');
