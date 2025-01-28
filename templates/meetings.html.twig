@@ -185,11 +185,12 @@
 </head>
 <body>
 <div class="sidebar">
-    <a href="/dashboard" class="{{ app.request.attributes.get('_route') == 'dashboard' ? 'active' : '' }}">Dashboard</a>
-    <a href="/meetings" class="{{ app.request.attributes.get('_route') == 'meetings' ? 'active' : '' }}">Meetings</a>
-    <a href="/friends" class="{{ app.request.attributes.get('_route') == 'friends' ? 'active' : '' }}">Friends</a>
-    <a href="/recurring-events" class="{{ app.request.attributes.get('_route') == 'recurring_events' ? 'active' : '' }}">Recurring Events</a>
-    <a href="/settings" class="{{ app.request.attributes.get('_route') == 'settings' ? 'active' : '' }}">Settings</a>
+    <a href="/mainPage">Dashboard</a>
+    <a href="/meetings">Meetings</a>
+    <a href="/friends">Friends</a>
+    <a href="/notifications" class="active">Notifications</a>
+    <a href="/recurring-events">Recurring Events</a>
+    <a href="/settings">Settings</a>
     <a href="/logout" class="logout">Logout</a>
 </div>
 

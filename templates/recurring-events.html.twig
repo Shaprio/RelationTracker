@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Recurring Events</title>
     <style>
-        /* Styling is unchanged */
+        /* General styles */
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -30,7 +30,6 @@
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
         }
 
         .sidebar a:hover {
@@ -63,18 +62,15 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .header h1 {
-            margin: 0;
-        }
-
         .header button {
-            padding: 0.6rem 1rem;
+            padding: 0.6rem 1.2rem;
             background-color: #1E3A5F;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            font-weight: bold;
         }
 
         .header button:hover {
@@ -82,14 +78,8 @@
         }
 
         .event-list {
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            background-color: #f5f5f5;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 150px);
         }
 
         .event-item {
@@ -97,20 +87,15 @@
             color: white;
             padding: 1rem;
             border-radius: 4px;
-            font-weight: bold;
-            text-align: left;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 1rem;
         }
 
-        .event-item h3 {
-            margin: 0 0 0.5rem;
-        }
-
-        .event-item .buttons {
+        .event-item .details {
             display: flex;
-            gap: 0.5rem;
+            gap: 1rem;
         }
 
         .event-item button {
@@ -120,6 +105,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
         }
 
         .event-item button:hover {
@@ -127,9 +113,9 @@
             color: #3b5c87;
         }
 
-        .important-btn.marked {
-            background-color: #FFCC00;
-            color: black;
+        .important-btn {
+            background-color: white;
+            color: #FFD700;
         }
 
         .modal {
@@ -139,30 +125,28 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background: #fff;
+            background-color: white;
             padding: 2rem;
             border-radius: 8px;
-            width: 30%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 40%;
         }
 
-        .modal-content label {
-            margin-bottom: 0.5rem;
-            display: block;
-            font-weight: bold;
+        .modal-content form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
-        .modal-content input,
-        .modal-content textarea,
-        .modal-content select {
+        .modal-content input, .modal-content select {
             width: 100%;
             padding: 0.5rem;
-            margin-bottom: 1rem;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
@@ -183,92 +167,241 @@
 </head>
 <body>
 <div class="sidebar">
-    <a href="/dashboard" class="{{ app.request.attributes.get('_route') == 'dashboard' ? 'active' : '' }}">Dashboard</a>
-    <a href="/meetings" class="{{ app.request.attributes.get('_route') == 'meetings' ? 'active' : '' }}">Meetings</a>
-    <a href="/friends" class="{{ app.request.attributes.get('_route') == 'friends' ? 'active' : '' }}">Friends</a>
-    <a href="/recurring-events" class="{{ app.request.attributes.get('_route') == 'recurring_events' ? 'active' : '' }}">Recurring Events</a>
-    <a href="/settings" class="{{ app.request.attributes.get('_route') == 'settings' ? 'active' : '' }}">Settings</a>
+    <a href="/mainPage">Dashboard</a>
+    <a href="/meetings">Meetings</a>
+    <a href="/friends">Friends</a>
+    <a href="/notifications" class="active">Notifications</a>
+    <a href="/recurring-events">Recurring Events</a>
+    <a href="/settings">Settings</a>
     <a href="/logout" class="logout">Logout</a>
 </div>
 
 <div class="content">
     <div class="header">
         <h1>Recurring Events</h1>
-        <button id="addRecurringEventBtn">Add New Event</button>
+        <button id="addEventBtn">Add New Event</button>
     </div>
 
     <div class="event-list">
         {% for event in events %}
             <div class="event-item">
-                <p>Title: {{ event.title }}</p>
-                <p>Description: {{ event.description }}</p>
-                <p>Start Date: {{ event.startDate|date('Y-m-d') }}</p>
-                <p>End Date: {{ event.endDate ? event.endDate|date('Y-m-d') : 'No end date' }}</p>
-                <button class="editEventBtn" data-id="{{ event.id }}">Edit</button>
-                <button class="important-btn {{ event.isImportant ? 'marked' : '' }}" data-id="{{ event.id }}">
-                    {{ event.isImportant ? 'Unmark Important' : 'Mark as Important' }}
-                </button>
+                <div class="details" style="flex: 1; display: flex; gap: 1rem; justify-content: flex-start;">
+                    <p><strong>Title:</strong> {{ event.title }}</p>
+                    <p><strong>Date:</strong> {{ event.startDate|date('Y-m-d') }}</p>
+                    <p><strong>Recurrence:</strong> {{ event.recurrencePattern }}</p>
+                </div>
+                <div class="buttons">
+                    <button class="detailsEventBtn" data-id="{{ event.id }}">Details</button>
+                    <button class="editEventBtn" data-id="{{ event.id }}">Edit</button>
+                    <button class="deleteEventBtn" data-id="{{ event.id }}">Delete</button>
+                    <button
+                        class="importantEventBtn {% if event.isImportant %}important-btn{% endif %}"
+                        data-id="{{ event.id }}"
+                        data-important="{{ event.isImportant }}">
+                        {{ event.isImportant ? 'Unmark Important' : 'Mark as Important' }}
+                    </button>
+                </div>
             </div>
+        {% else %}
+            <p>No events available.</p>
         {% endfor %}
     </div>
 </div>
 
-<!-- Modal -->
-<div class="modal" id="recurringEventModal">
+<!-- Modal for Adding/Editing Event -->
+<div class="modal" id="eventModal">
     <div class="modal-content">
+        <h2 id="modalTitle">Add Event</h2>
         <form method="POST" action="/recurring-events">
-            <input type="hidden" name="event_id" id="recurringEventId">
-            <input type="text" name="title" id="recurringEventTitle" placeholder="Title" required>
-            <textarea name="description" id="recurringEventDescription" placeholder="Description"></textarea>
-            <label for="startDate">Start Date:</label>
-            <input type="date" name="start_date" id="recurringEventStartDate" required>
-            <label for="endDate">End Date:</label>
-            <input type="date" name="end_date" id="recurringEventEndDate">
-            <label for="recurrencePattern">Recurrence Pattern:</label>
-            <select name="recurrence_pattern" id="recurringEventRecurrencePattern" required>
+            <input type="hidden" name="event_id" id="eventId">
+            <input type="text" name="title" id="eventTitle" placeholder="Title" required>
+            <textarea name="description" id="eventDescription" placeholder="Description"></textarea>
+            <select name="recurrence_pattern" id="eventRecurrencePattern" required>
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
                 <option value="yearly">Yearly</option>
             </select>
-            <button type="submit">Save</button>
+            <input type="date" name="start_date" id="eventStartDate" required>
+            <label for="contacts">Assign Contacts:</label>
+            <select name="contacts[]" id="eventContacts" multiple>
+                {% for contact in contacts %}
+                    <option value="{{ contact.id }}">{{ contact.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Save Event</button>
         </form>
     </div>
 </div>
 
+<!-- Modal for Event Details -->
+<div class="modal" id="detailsModal">
+    <div class="modal-content">
+        <h2>Event Details</h2>
+        <p id="detailsContent"></p>
+        <button id="closeDetailsModal">Close</button>
+    </div>
+</div>
+
 <script>
-    // JavaScript logic for modal
-    const modal = document.getElementById('recurringEventModal');
-    const addRecurringEventBtn = document.getElementById('addRecurringEventBtn');
+    const eventModal = document.getElementById('eventModal');
+    const detailsModal = document.getElementById('detailsModal');
+    const addEventBtn = document.getElementById('addEventBtn');
     const editEventBtns = document.querySelectorAll('.editEventBtn');
-    const importantBtns = document.querySelectorAll('.important-btn');
+    const deleteEventBtns = document.querySelectorAll('.deleteEventBtn');
+    const importantEventBtns = document.querySelectorAll('.importantEventBtn');
+    const detailsEventBtns = document.querySelectorAll('.detailsEventBtn');
+    const closeDetailsModal = document.getElementById('closeDetailsModal');
+    const detailsContent = document.getElementById('detailsContent');
 
-    // Add recurring event
-    addRecurringEventBtn.addEventListener('click', () => {
-        modal.style.display = 'flex';
-        document.getElementById('recurringEventId').value = '';
-        document.getElementById('recurringEventTitle').value = '';
-        document.getElementById('recurringEventDescription').value = '';
-        document.getElementById('recurringEventStartDate').value = '';
-        document.getElementById('recurringEventEndDate').value = '';
-        document.getElementById('recurringEventRecurrencePattern').value = '';
-    });
-
-    // Mark or unmark as important
-    importantBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const eventId = btn.getAttribute('data-id');
-            const isImportant = btn.classList.contains('marked');
-
-            fetch(`/recurring-events/${eventId}/important`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ important: !isImportant })
-            }).then(() => {
-                btn.classList.toggle('marked');
-                btn.textContent = isImportant ? 'Mark as Important' : 'Unmark Important';
-            });
+    /** Show the Add modal with cleared fields. */
+    addEventBtn.addEventListener('click', () => {
+        console.log('Add Event button clicked');
+        eventModal.style.display = 'flex';
+        document.getElementById('eventId').value = '';
+        document.getElementById('eventTitle').value = '';
+        document.getElementById('eventDescription').value = '';
+        document.getElementById('eventRecurrencePattern').value = 'daily';
+        document.getElementById('eventStartDate').value = '';
+        const eventContacts = document.getElementById('eventContacts');
+        Array.from(eventContacts.options).forEach(option => {
+            option.selected = false;
         });
     });
+
+    /** Handle Edit button */
+    editEventBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const eventId = btn.dataset.id;
+            console.log(`Edit event with ID: ${eventId}`);
+
+            fetch(`/recurring-events/${eventId}/details`)
+                .then(response => {
+                    console.log('Edit fetch status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch details for event ID: ${eventId}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Edit fetch data:', data);
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    // Populate the Edit modal
+                    eventModal.style.display = 'flex';
+                    document.getElementById('eventId').value = data.id;
+                    document.getElementById('eventTitle').value = data.title;
+                    document.getElementById('eventDescription').value = data.description || '';
+                    document.getElementById('eventRecurrencePattern').value = data.recurrencePattern;
+                    document.getElementById('eventStartDate').value = data.startDate;
+                    const eventContacts = document.getElementById('eventContacts');
+                    Array.from(eventContacts.options).forEach(option => {
+                        option.selected = data.contacts
+                            .map(contact => contact.id)
+                            .includes(parseInt(option.value, 10));
+                    });
+                })
+                .catch(err => {
+                    console.error('Edit fetch error:', err);
+                    alert('An error occurred while fetching event details for editing.');
+                });
+        });
+    });
+
+    /** Handle Details button */
+    detailsEventBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const eventId = btn.dataset.id;
+            console.log(`Details for event ID: ${eventId}`);
+
+            fetch(`/recurring-events/${eventId}/details`)
+                .then(response => {
+                    console.log('Details fetch status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch details for event ID: ${eventId}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Details fetch data:', data);
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    detailsContent.innerHTML = `
+                        <p><strong>Title:</strong> ${data.title}</p>
+                        <p><strong>Date:</strong> ${data.startDate}</p>
+                        <p><strong>Recurrence:</strong> ${data.recurrencePattern}</p>
+                        <p><strong>Description:</strong> ${data.description || 'N/A'}</p>
+                        <p><strong>Contacts:</strong> ${
+                        data.contacts.map(c => c.name).join(', ')
+                    }</p>
+                    `;
+                    detailsModal.style.display = 'flex';
+                })
+                .catch(err => {
+                    console.error('Details fetch error:', err);
+                    alert('An error occurred while fetching event details.');
+                });
+        });
+    });
+
+    /** Handle Delete button */
+    deleteEventBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const eventId = btn.dataset.id;
+            console.log(`Delete event with ID: ${eventId}`);
+            if (confirm('Are you sure you want to delete this event?')) {
+                fetch(`/recurring-events/${eventId}/delete`, { method: 'POST' })
+                    .then(() => {
+                        console.log(`Event ${eventId} deleted. Reloading page...`);
+                        location.reload();
+                    })
+                    .catch(err => {
+                        console.error('Failed to delete event:', err);
+                        alert('An error occurred while deleting the event.');
+                    });
+            }
+        });
+    });
+
+    /** Handle Mark as Important toggle */
+    importantEventBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const eventId = btn.dataset.id;
+            console.log(`Toggle importance for event ID: ${eventId}`);
+
+            fetch(`/recurring-events/${eventId}/important`, { method: 'POST' })
+                .then(() => {
+                    btn.classList.toggle('important-btn');
+                    btn.textContent = btn.classList.contains('important-btn')
+                        ? 'Unmark Important'
+                        : 'Mark as Important';
+                })
+                .catch(err => {
+                    console.error('Failed to toggle importance:', err);
+                    alert('An error occurred while toggling importance.');
+                });
+        });
+    });
+
+    /** Close modals on outside click */
+    window.addEventListener('click', (e) => {
+        if (e.target === eventModal) {
+            eventModal.style.display = 'none';
+        }
+        if (e.target === detailsModal) {
+            detailsModal.style.display = 'none';
+        }
+    });
+
+    /** Close details modal on button click */
+    closeDetailsModal.addEventListener('click', () => {
+        detailsModal.style.display = 'none';
+    });
 </script>
+
 </body>
+

@@ -553,6 +553,64 @@ class WebController extends AbstractController
         ]);
     }
 
+    #[Route('/recurring-events/{id}/details', name: 'recurring_event_details', methods: ['GET'])]
+    public function getRecurringEventDetails(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $event = $entityManager->getRepository(RecurringEvent::class)->find($id);
+
+        if (!$event) {
+            return new JsonResponse(['error' => 'Event not found'], 404);
+        }
+
+        // Return data including associated contacts if needed
+        return new JsonResponse([
+            'id' => $event->getId(),
+            'title' => $event->getTitle(),
+            'description' => $event->getDescription(),
+            'recurrencePattern' => $event->getRecurrencePattern(),
+            'startDate' => $event->getStartDate()->format('Y-m-d'),
+            'isImportant' => $event->getIsImportant(),
+            'contacts' => array_map(
+                fn($contact) => [
+                    'id' => $contact->getId(),
+                    'name' => $contact->getName(),
+                ],
+                $event->getContacts()->toArray()
+            ),
+        ]);
+    }
+
+
+    #[Route('/recurring-events/{id}/delete', name: 'recurring_event_delete', methods: ['POST'])]
+    public function deleteRecurringEvent(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $event = $entityManager->getRepository(RecurringEvent::class)->find($id);
+
+        if (!$event) {
+            return new JsonResponse(['error' => 'Event not found'], 404);
+        }
+
+        $entityManager->remove($event);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/recurring-events/{id}/important', name: 'recurring_event_important', methods: ['POST'])]
+    public function toggleImportantRecurringEvent(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $event = $entityManager->getRepository(RecurringEvent::class)->find($id);
+
+        if (!$event) {
+            return new JsonResponse(['error' => 'Event not found'], 404);
+        }
+
+        $event->setIsImportant(!$event->getIsImportant());
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true, 'isImportant' => $event->getIsImportant()]);
+    }
+
 
     #[Route('/recurring-events/{id}/important', name: 'mark_recurring_event_important', methods: ['POST'])]
     public function markRecurringEventImportant(int $id, EntityManagerInterface $entityManager): JsonResponse
