@@ -15,6 +15,9 @@ use App\Entity\User;
 use App\Entity\Contact;
 use App\Entity\Event;
 use App\Entity\EventContact;
+use App\Entity\RecurringEvent;
+use App\Entity\RecurringEventContact;
+
 
 
 class WebController extends AbstractController
@@ -340,6 +343,94 @@ class WebController extends AbstractController
     {
         return $this->render('settings.html.twig');
     }
+
+    #[Route('/recurring-events', name: 'recurring_events', methods: ['GET', 'POST'])]
+    public function recurringEvents(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('login');
+        }
+
+        // Pobierz wydarzenia powiązane z użytkownikiem
+        $recurringEvents = $entityManager->getRepository(RecurringEvent::class)
+            ->findBy(['owner' => $user]);
+
+        // Pobierz kontakty użytkownika
+        $contacts = $entityManager->getRepository(Contact::class)
+            ->findBy(['userName' => $user]);
+
+        if ($request->isMethod('POST')) {
+            $eventId = $request->request->get('event_id');
+            $title = $request->request->get('title');
+            $description = $request->request->get('description');
+            $recurrencePattern = $request->request->get('recurrence_pattern');
+            $startDate = $request->request->get('start_date');
+            $endDate = $request->request->get('end_date');
+            $selectedContacts = $request->request->all('contacts');
+
+            if ($eventId) {
+                // Edytuj istniejące wydarzenie
+                $event = $entityManager->getRepository(RecurringEvent::class)->find($eventId);
+                $event->setTitle($title)
+                    ->setDescription($description)
+                    ->setRecurrencePattern($recurrencePattern)
+                    ->setStartDate(new \DateTime($startDate))
+                    ->setEndDate($endDate ? new \DateTime($endDate) : null)
+                    ->setUpdatedAt(new \DateTime());
+
+                // Usuń istniejące kontakty
+                foreach ($event->getContacts() as $existingContact) {
+                    $entityManager->remove($existingContact);
+                }
+
+                // Dodaj nowe kontakty
+                foreach ($selectedContacts as $contactId) {
+                    $contact = $entityManager->getRepository(Contact::class)->find($contactId);
+                    if ($contact) {
+                        $recurringEventContact = new RecurringEventContact();
+                        $recurringEventContact->setRecurringEvent($event);
+                        $recurringEventContact->setContact($contact);
+                        $entityManager->persist($recurringEventContact);
+                    }
+                }
+            } else {
+                // Dodaj nowe wydarzenie
+                $event = new RecurringEvent();
+                $event->setTitle($title)
+                    ->setDescription($description)
+                    ->setRecurrencePattern($recurrencePattern)
+                    ->setStartDate(new \DateTime($startDate))
+                    ->setEndDate($endDate ? new \DateTime($endDate) : null)
+                    ->setOwner($user)
+                    ->setCreatedAt(new \DateTimeImmutable())
+                    ->setUpdatedAt(new \DateTime());
+
+                $entityManager->persist($event);
+
+                // Dodaj kontakty do wydarzenia
+                foreach ($selectedContacts as $contactId) {
+                    $contact = $entityManager->getRepository(Contact::class)->find($contactId);
+                    if ($contact) {
+                        $recurringEventContact = new RecurringEventContact();
+                        $recurringEventContact->setRecurringEvent($event);
+                        $recurringEventContact->setContact($contact);
+                        $entityManager->persist($recurringEventContact);
+                    }
+                }
+            }
+
+            $entityManager->flush();
+
+            return $this->redirectToRoute('recurring_events');
+        }
+
+        return $this->render('recurring-events.html.twig', [
+            'events' => $recurringEvents,
+            'contacts' => $contacts,
+        ]);
+    }
+
 }
 
 

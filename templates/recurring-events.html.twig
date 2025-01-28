@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - Meetings</title>
+    <title>Recurring Events</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,11 +36,6 @@
             background-color: #3b5c87;
         }
 
-        .sidebar a.active {
-            background-color: #3b5c87;
-            font-weight: bold;
-        }
-
         .sidebar .logout {
             margin-top: auto;
             background-color: #FF6666;
@@ -67,10 +62,8 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .header h1 {
+            margin: 0;
         }
 
         .header button {
@@ -87,30 +80,36 @@
             background-color: #3b5c87;
         }
 
-        .meeting-list {
+        .event-list {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
             background-color: #f5f5f5;
             padding: 1rem;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            overflow-y: auto; /* Dodanie przewijania */
-            max-height: calc(100vh - 150px); /* Ograniczenie wysokości */
         }
 
-        .meeting-item {
+        .event-item {
             background-color: #76B6F8;
             color: white;
             padding: 1rem;
             border-radius: 4px;
             font-weight: bold;
-            text-align: center;
-            position: relative;
+            text-align: left;
         }
 
-        .meeting-item button {
-            margin-top: 0.5rem;
+        .event-item h3 {
+            margin: 0 0 0.5rem;
+        }
+
+        .event-item p {
+            margin: 0.5rem 0;
+        }
+
+        .event-item button {
+            margin-top: 1rem;
             padding: 0.5rem 1rem;
             background-color: white;
             color: #76B6F8;
@@ -119,7 +118,7 @@
             cursor: pointer;
         }
 
-        .meeting-item button:hover {
+        .event-item button:hover {
             background-color: #fff;
             color: #3b5c87;
         }
@@ -131,52 +130,36 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background-color: white;
+            background: #fff;
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 30%;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        .modal-content label {
+            margin-bottom: 0.5rem;
+            display: block;
+            font-weight: bold;
         }
 
-        .modal-header h2 {
-            margin: 0;
-        }
-
-        .modal-close {
-            cursor: pointer;
-            background-color: transparent;
-            border: none;
-            font-size: 1.5rem;
-        }
-
-        .modal form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .modal input, .modal textarea, .modal select {
+        .modal-content input,
+        .modal-content textarea,
+        .modal-content select {
             width: 100%;
             padding: 0.5rem;
+            margin-bottom: 1rem;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
 
-        .modal button {
-            padding: 0.5rem;
+        .modal-content button {
+            padding: 0.5rem 1rem;
             background-color: #1E3A5F;
             color: white;
             border: none;
@@ -184,35 +167,37 @@
             cursor: pointer;
         }
 
-        .modal button:hover {
+        .modal-content button:hover {
             background-color: #3b5c87;
         }
     </style>
 </head>
 <body>
 <div class="sidebar">
-    <a href="/dashboard" class="dashboard-link">Dashboard</a>
-    <a href="/meetings" class="meetings-link active">Meetings</a>
-    <a href="/friends" class="friends-link">Friends</a>
-    <a href="/notifications" class="notifications-link">Notification</a>
-    <a href="/settings" class="settings-link">Settings</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/meetings">Meetings</a>
+    <a href="/friends">Friends</a>
+    <a href="/recurring-events">Recurring Events</a>
+    <a href="/settings">Settings</a>
     <a href="/logout" class="logout">Logout</a>
 </div>
 
 <div class="content">
     <div class="header">
-        <h1>Meetings</h1>
-        <button id="addEventBtn">Add New Event</button>
+        <h1>Recurring Events</h1>
+        <button id="addEventBtn">Add Event</button>
     </div>
 
-    <div class="meeting-list">
+    <div class="event-list">
         {% for event in events %}
-            <div class="meeting-item">
-                <p>Title: {{ event.title }}</p>
+            <div class="event-item">
+                <h3>{{ event.title }}</h3>
                 <p>Description: {{ event.description }}</p>
-                <p>Date: {{ event.date|date('Y-m-d') }}</p>
-                <p>Contacts:
-                    {% for contact in event.contact %}
+                <p>Start Date: {{ event.startDate|date('Y-m-d') }}</p>
+                <p>End Date: {{ event.endDate ? event.endDate|date('Y-m-d') : 'No end date' }}</p>
+                <p>Recurrence: {{ event.recurrencePattern|capitalize }}</p>
+                <p class="contacts">Contacts:
+                    {% for contact in event.contacts %}
                         {{ contact.contact.name }}{% if not loop.last %}, {% endif %}
                     {% endfor %}
                 </p>
@@ -225,16 +210,25 @@
 <!-- Modal -->
 <div class="modal" id="eventModal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="modalTitle">Add Event</h2>
-            <button class="modal-close" id="closeModal">&times;</button>
-        </div>
-        <form method="POST" action="/meetings">
+        <h2 id="modalTitle">Add Event</h2>
+        <form method="POST">
             <input type="hidden" name="event_id" id="eventId">
-            <input type="text" name="title" id="eventTitle" placeholder="Title" required>
-            <textarea name="description" id="eventDescription" placeholder="Description"></textarea>
-            <input type="date" name="date" id="eventDate" required>
-            <label>Contacts:</label>
+            <label for="title">Title:</label>
+            <input type="text" name="title" id="eventTitle" required>
+            <label for="description">Description:</label>
+            <textarea name="description" id="eventDescription"></textarea>
+            <label for="recurrence_pattern">Recurrence Pattern:</label>
+            <select name="recurrence_pattern" id="eventRecurrencePattern" required>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+            <label for="start_date">Start Date:</label>
+            <input type="date" name="start_date" id="eventStartDate" required>
+            <label for="end_date">End Date:</label>
+            <input type="date" name="end_date" id="eventEndDate">
+            <label for="contacts">Contacts:</label>
             <select name="contacts[]" id="eventContacts" multiple>
                 {% for contact in contacts %}
                     <option value="{{ contact.id }}">{{ contact.name }}</option>
@@ -248,13 +242,14 @@
 <script>
     const modal = document.getElementById('eventModal');
     const addEventBtn = document.getElementById('addEventBtn');
-    const closeModal = document.getElementById('closeModal');
     const editEventBtns = document.querySelectorAll('.editEventBtn');
     const modalTitle = document.getElementById('modalTitle');
     const eventId = document.getElementById('eventId');
     const eventTitle = document.getElementById('eventTitle');
     const eventDescription = document.getElementById('eventDescription');
-    const eventDate = document.getElementById('eventDate');
+    const eventRecurrencePattern = document.getElementById('eventRecurrencePattern');
+    const eventStartDate = document.getElementById('eventStartDate');
+    const eventEndDate = document.getElementById('eventEndDate');
     const eventContacts = document.getElementById('eventContacts');
 
     addEventBtn.addEventListener('click', () => {
@@ -262,24 +257,26 @@
         eventId.value = '';
         eventTitle.value = '';
         eventDescription.value = '';
-        eventDate.value = '';
+        eventRecurrencePattern.value = '';
+        eventStartDate.value = '';
+        eventEndDate.value = '';
         eventContacts.value = '';
         modal.style.display = 'flex';
-    });
-
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
     });
 
     editEventBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             modalTitle.textContent = 'Edit Event';
             const id = btn.dataset.id;
+            const parent = btn.parentElement;
 
             eventId.value = id;
-            eventTitle.value = btn.parentElement.querySelector('p:nth-of-type(1)').textContent.split(': ')[1];
-            eventDescription.value = btn.parentElement.querySelector('p:nth-of-type(2)').textContent.split(': ')[1];
-            eventDate.value = btn.parentElement.querySelector('p:nth-of-type(3)').textContent.split(': ')[1];
+            eventTitle.value = parent.querySelector('h3').textContent;
+            eventDescription.value = parent.querySelector('p:nth-of-type(1)').textContent.split(': ')[1];
+            eventRecurrencePattern.value = parent.querySelector('p:nth-of-type(3)').textContent.toLowerCase();
+            eventStartDate.value = parent.querySelector('p:nth-of-type(2)').textContent.split(': ')[1];
+            const endDate = parent.querySelector('p:nth-of-type(3)').textContent.split(': ')[1];
+            eventEndDate.value = endDate !== 'No end date' ? endDate : '';
             modal.style.display = 'flex';
         });
     });
