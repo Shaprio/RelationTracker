@@ -18,6 +18,7 @@ use App\Entity\Event;
 use App\Entity\EventContact;
 use App\Entity\RecurringEvent;
 use App\Entity\RecurringEventContact;
+use App\Entity\Interaction;
 
 
 
@@ -272,7 +273,6 @@ class WebController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        // Pobieranie kontaktów użytkownika
         $contacts = $entityManager->getRepository(Contact::class)->findBy(['userName' => $user]);
 
         if ($request->isMethod('POST')) {
@@ -280,29 +280,29 @@ class WebController extends AbstractController
             $name = $request->request->get('name');
             $email = $request->request->get('email');
             $phone = $request->request->get('phone');
-            $birthday = $request->request->get('birthday'); // Pobranie daty urodzin
+            $birthday = $request->request->get('birthday');
             $note = $request->request->get('note');
 
             if ($contactId) {
-                // Edycja istniejącego kontaktu
+                // Update existing contact
                 $contact = $entityManager->getRepository(Contact::class)->find($contactId);
                 if ($contact && $contact->getUserName() === $user) {
                     $contact->setName($name);
                     $contact->setEmailC($email);
                     $contact->setPhone($phone);
-                    $contact->setBirthday($birthday ? new \DateTime($birthday) : null); // Konwersja daty na obiekt DateTime
+                    $contact->setBirthday($birthday ? new \DateTime($birthday) : null);
                     $contact->setNote($note);
                     $contact->setUpdateAt(new \DateTime());
                     $entityManager->flush();
                 }
             } else {
-                // Dodawanie nowego kontaktu
+                // Create new contact
                 $contact = new Contact();
                 $contact->setUserName($user);
                 $contact->setName($name);
                 $contact->setEmailC($email);
                 $contact->setPhone($phone);
-                $contact->setBirthday($birthday ? new \DateTime($birthday) : null); // Konwersja daty na obiekt DateTime
+                $contact->setBirthday($birthday ? new \DateTime($birthday) : null);
                 $contact->setNote($note);
                 $contact->setCreatedAt(new \DateTimeImmutable());
                 $contact->setUpdateAt(new \DateTime());
@@ -318,7 +318,86 @@ class WebController extends AbstractController
         ]);
     }
 
+    #[Route('/friends/interact', name: 'log_interaction', methods: ['POST'])]
+    public function logInteraction(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
 
+        if (!$user) {
+            return $this->redirectToRoute('login');
+        }
+
+        $contactId = $request->request->get('contact_id');
+        $initiatedBy = $request->request->get('initiatedBy'); // 'self' or 'friend'
+
+        $contact = $entityManager->getRepository(Contact::class)->find($contactId);
+
+        if ($contact && $contact->getUserName() === $user) {
+            $interaction = new Interaction();
+            $interaction->setContact($contact);
+            $interaction->setInitiatedBy($initiatedBy);
+            $interaction->setInteractionDate(new \DateTimeImmutable());
+
+            $entityManager->persist($interaction);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Interaction logged successfully!');
+        } else {
+            $this->addFlash('error', 'Contact not found or unauthorized!');
+        }
+
+        return $this->redirectToRoute('friends');
+    }
+
+    #[Route('/friends/{id}/details', name: 'contact_details', methods: ['GET'])]
+    public function contactDetails(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('login');
+        }
+
+        $contact = $entityManager->getRepository(Contact::class)->find($id);
+
+        if (!$contact || $contact->getUserName() !== $user) {
+            return $this->json(['error' => 'Contact not found or unauthorized.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json([
+            'id' => $contact->getId(),
+            'name' => $contact->getName(),
+            'emailC' => $contact->getEmailC(),
+            'phone' => $contact->getPhone(),
+            'address' => $contact->getAddress(),
+            'birthday' => $contact->getBirthday() ? $contact->getBirthday()->format('Y-m-d') : null,
+            'relationship' => $contact->getRelationship(),
+            'note' => $contact->getNote(),
+        ]);
+    }
+
+    #[Route('/friends/{id}/delete', name: 'delete_contact', methods: ['POST'])]
+    public function deleteContact(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('login');
+        }
+
+        $contact = $entityManager->getRepository(Contact::class)->find($id);
+
+        if ($contact && $contact->getUserName() === $user) {
+            $entityManager->remove($contact);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Contact deleted successfully.');
+        } else {
+            $this->addFlash('error', 'Contact not found or unauthorized.');
+        }
+
+        return $this->redirectToRoute('friends');
+    }
 
     #[Route('/notifications', name: 'notifications')]
     public function notifications(EntityManagerInterface $entityManager, Security $security): Response
@@ -474,28 +553,6 @@ class WebController extends AbstractController
         ]);
     }
 
-    #[Route('/toggle-important', name: 'toggle_important', methods: ['POST'])]
-    public function toggleImportant(Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $eventId = $request->request->get('event_id');
-        $eventType = $request->request->get('event_type'); // 'meeting' or 'recurring'
-
-        $event = null;
-        if ($eventType === 'meeting') {
-            $event = $entityManager->getRepository(Event::class)->find($eventId);
-        } elseif ($eventType === 'recurring') {
-            $event = $entityManager->getRepository(RecurringEvent::class)->find($eventId);
-        }
-
-        if ($event) {
-            $event->setIsImportant(!$event->getIsImportant()); // Toggle important flag
-            $entityManager->flush();
-
-            return new JsonResponse(['success' => true, 'isImportant' => $event->getIsImportant()]);
-        }
-
-        return new JsonResponse(['success' => false], 400);
-    }
 
     #[Route('/recurring-events/{id}/important', name: 'mark_recurring_event_important', methods: ['POST'])]
     public function markRecurringEventImportant(int $id, EntityManagerInterface $entityManager): JsonResponse

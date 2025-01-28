@@ -53,19 +53,28 @@ class Contact
     /**
      * @var Collection<int, EventContact>
      */
-    #[ORM\OneToMany(targetEntity: EventContact::class, mappedBy: 'contact')]
+    #[ORM\OneToMany(mappedBy: 'contact', targetEntity: EventContact::class)]
     private Collection $eventC;
 
     /**
      * @var Collection<int, Reminder>
      */
-    #[ORM\OneToMany(targetEntity: Reminder::class, mappedBy: 'contactR')]
+    #[ORM\OneToMany(mappedBy: 'contactR', targetEntity: Reminder::class)]
     private Collection $reminders;
+
+    /**
+     * @var Collection<int, Interaction>
+     */
+    #[ORM\OneToMany(mappedBy: 'contact', targetEntity: Interaction::class, cascade: ['persist', 'remove'])]
+    private Collection $interactions;
 
     public function __construct()
     {
         $this->eventC = new ArrayCollection();
         $this->reminders = new ArrayCollection();
+        $this->interactions = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updateAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -81,7 +90,6 @@ class Contact
     public function setUserName(?User $userName): static
     {
         $this->userName = $userName;
-
         return $this;
     }
 
@@ -93,7 +101,6 @@ class Contact
     public function setEmailC(?string $emailC): static
     {
         $this->emailC = $emailC;
-
         return $this;
     }
 
@@ -105,7 +112,6 @@ class Contact
     public function setPhone(?string $phone): static
     {
         $this->phone = $phone;
-
         return $this;
     }
 
@@ -117,7 +123,6 @@ class Contact
     public function setBirthday(?\DateTimeInterface $birthday): static
     {
         $this->birthday = $birthday;
-
         return $this;
     }
 
@@ -129,7 +134,6 @@ class Contact
     public function setAddress(?string $address): static
     {
         $this->address = $address;
-
         return $this;
     }
 
@@ -141,7 +145,6 @@ class Contact
     public function setNote(?string $note): static
     {
         $this->note = $note;
-
         return $this;
     }
 
@@ -153,7 +156,6 @@ class Contact
     public function setRelationship(?string $relationship): static
     {
         $this->relationship = $relationship;
-
         return $this;
     }
 
@@ -165,7 +167,6 @@ class Contact
     public function setProfilePicture(?string $profilePicture): static
     {
         $this->profilePicture = $profilePicture;
-
         return $this;
     }
 
@@ -177,7 +178,6 @@ class Contact
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -189,7 +189,6 @@ class Contact
     public function setUpdateAt(\DateTimeInterface $updateAt): static
     {
         $this->updateAt = $updateAt;
-
         return $this;
     }
 
@@ -201,7 +200,6 @@ class Contact
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -219,19 +217,16 @@ class Contact
             $this->eventC->add($eventC);
             $eventC->setContact($this);
         }
-
         return $this;
     }
 
     public function removeEventC(EventContact $eventC): static
     {
         if ($this->eventC->removeElement($eventC)) {
-            // set the owning side to null (unless already changed)
             if ($eventC->getContact() === $this) {
                 $eventC->setContact(null);
             }
         }
-
         return $this;
     }
 
@@ -249,20 +244,45 @@ class Contact
             $this->reminders->add($reminder);
             $reminder->setContactR($this);
         }
-
         return $this;
     }
 
     public function removeReminder(Reminder $reminder): static
     {
         if ($this->reminders->removeElement($reminder)) {
-            // set the owning side to null (unless already changed)
             if ($reminder->getContactR() === $this) {
                 $reminder->setContactR(null);
             }
         }
+        return $this;
+    }
 
+    /**
+     * @return Collection<int, Interaction>
+     */
+    public function getInteractions(): Collection
+    {
+        return $this->interactions;
+    }
+
+    public function addInteraction(Interaction $interaction): static
+    {
+        if (!$this->interactions->contains($interaction)) {
+            $this->interactions->add($interaction);
+            $interaction->setContact($this);
+        }
+        return $this;
+    }
+
+    public function removeInteraction(Interaction $interaction): static
+    {
+        if ($this->interactions->removeElement($interaction)) {
+            if ($interaction->getContact() === $this) {
+                $interaction->setContact(null);
+            }
+        }
         return $this;
     }
 }
+
 

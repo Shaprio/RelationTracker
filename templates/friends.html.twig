@@ -29,7 +29,6 @@
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
         }
 
         .sidebar a:hover {
@@ -62,19 +61,15 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
         .header button {
-            padding: 0.6rem 1rem;
+            padding: 0.6rem 1.2rem;
             background-color: #1E3A5F;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
         }
 
         .header button:hover {
@@ -85,10 +80,25 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
+            max-height: 60vh; /* Enable scrolling */
+            overflow-y: auto;
             background-color: #f5f5f5;
             padding: 1rem;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .friend-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .friend-grid::-webkit-scrollbar-thumb {
+            background-color: #76B6F8;
+            border-radius: 4px;
+        }
+
+        .friend-grid::-webkit-scrollbar-thumb:hover {
+            background-color: #3b5c87;
         }
 
         .friend-item {
@@ -98,16 +108,25 @@
             border-radius: 4px;
             font-weight: bold;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
         }
 
         .friend-item button {
-            margin-top: 0.5rem;
             padding: 0.5rem 1rem;
             background-color: white;
             color: #76B6F8;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
         }
 
         .friend-item button:hover {
@@ -135,39 +154,21 @@
             width: 30%;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-        }
-
-        .modal-close {
-            cursor: pointer;
-            background-color: transparent;
-            border: none;
-            font-size: 1.5rem;
-        }
-
-        .modal form {
+        .modal-content form {
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
 
-        .modal input, .modal textarea {
+        .modal-content input, .modal-content select, .modal-content textarea {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
 
-        .modal button {
-            padding: 0.5rem;
+        .modal-content button {
+            padding: 0.5rem 1rem;
             background-color: #1E3A5F;
             color: white;
             border: none;
@@ -175,18 +176,18 @@
             cursor: pointer;
         }
 
-        .modal button:hover {
+        .modal-content button:hover {
             background-color: #3b5c87;
         }
     </style>
 </head>
 <body>
 <div class="sidebar">
-    <a href="/dashboard" class="{{ app.request.attributes.get('_route') == 'dashboard' ? 'active' : '' }}">Dashboard</a>
-    <a href="/meetings" class="{{ app.request.attributes.get('_route') == 'meetings' ? 'active' : '' }}">Meetings</a>
-    <a href="/friends" class="{{ app.request.attributes.get('_route') == 'friends' ? 'active' : '' }}">Friends</a>
-    <a href="/recurring-events" class="{{ app.request.attributes.get('_route') == 'recurring_events' ? 'active' : '' }}">Recurring Events</a>
-    <a href="/settings" class="{{ app.request.attributes.get('_route') == 'settings' ? 'active' : '' }}">Settings</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/meetings">Meetings</a>
+    <a href="/friends" class="active">Friends</a>
+    <a href="/recurring-events">Recurring Events</a>
+    <a href="/settings">Settings</a>
     <a href="/logout" class="logout">Logout</a>
 </div>
 
@@ -199,83 +200,169 @@
     <div class="friend-grid">
         {% for contact in contacts %}
             <div class="friend-item">
-                <p>Name: {{ contact.name }}</p>
-                <p>Email: {{ contact.emailC }}</p>
-                <p>Birthday: {{ contact.birthday|date('Y-m-d') }}</p>
-                <button class="editContactBtn" data-id="{{ contact.id }}">Edit</button>
+                <p><strong>{{ contact.name }}</strong></p>
+                <button class="addInteractionBtn" data-id="{{ contact.id }}">Add Interaction</button>
+                <div class="button-row">
+                    <button class="detailsContactBtn" data-id="{{ contact.id }}">Details</button>
+                    <button class="editContactBtn" data-id="{{ contact.id }}">Edit</button>
+                    <button class="deleteContactBtn" data-id="{{ contact.id }}">Delete</button>
+                </div>
             </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modals -->
 <div class="modal" id="contactModal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="modalTitle">Add Contact</h2>
-            <button class="modal-close" id="closeModal">&times;</button>
-        </div>
+        <h2 id="modalTitle">Add Contact</h2>
         <form method="POST" action="/friends">
+            <input type="hidden" name="action" value="save_contact">
             <input type="hidden" name="contact_id" id="contactId">
             <input type="text" name="name" id="contactName" placeholder="Name" required>
-            <input type="email" name="email" id="contactEmail" placeholder="Email" required>
-            <input type="date" name="birthday" id="contactBirthday">
+            <input type="email" name="email" id="contactEmail" placeholder="Email">
             <input type="text" name="phone" id="contactPhone" placeholder="Phone">
+            <input type="text" name="address" id="contactAddress" placeholder="Address">
+            <input type="date" name="birthday" id="contactBirthday">
+            <input type="text" name="relationship" id="contactRelationship" placeholder="Relationship">
             <textarea name="note" id="contactNote" placeholder="Note"></textarea>
-            <button type="submit">Save</button>
+            <button type="submit">Save Contact</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="detailsModal">
+    <div class="modal-content">
+        <h2>Contact Details</h2>
+        <p id="detailsContent"></p>
+        <button id="closeDetailsModal">Close</button>
+    </div>
+</div>
+
+<div class="modal" id="interactionModal">
+    <div class="modal-content">
+        <h2>Add Interaction</h2>
+        <form method="POST" action="/friends/interact">
+            <input type="hidden" name="contact_id" id="interactionContactId">
+            <label for="initiatedBy">Initiated By:</label>
+            <select name="initiatedBy" id="interactionInitiatedBy">
+                <option value="self">Self</option>
+                <option value="friend">Friend</option>
+            </select>
+            <button type="submit">Save Interaction</button>
         </form>
     </div>
 </div>
 
 <script>
-    const modal = document.getElementById('contactModal');
+    const contactModal = document.getElementById('contactModal');
+    const detailsModal = document.getElementById('detailsModal');
+    const interactionModal = document.getElementById('interactionModal');
     const addContactBtn = document.getElementById('addContactBtn');
-    const closeModal = document.getElementById('closeModal');
+    const addInteractionBtns = document.querySelectorAll('.addInteractionBtn');
     const editContactBtns = document.querySelectorAll('.editContactBtn');
-    const modalTitle = document.getElementById('modalTitle');
+    const detailsContactBtns = document.querySelectorAll('.detailsContactBtn');
+    const deleteContactBtns = document.querySelectorAll('.deleteContactBtn');
+    const interactionContactId = document.getElementById('interactionContactId');
     const contactId = document.getElementById('contactId');
     const contactName = document.getElementById('contactName');
     const contactEmail = document.getElementById('contactEmail');
-    const contactBirthday = document.getElementById('contactBirthday');
     const contactPhone = document.getElementById('contactPhone');
+    const contactAddress = document.getElementById('contactAddress');
+    const contactBirthday = document.getElementById('contactBirthday');
+    const contactRelationship = document.getElementById('contactRelationship');
     const contactNote = document.getElementById('contactNote');
+    const detailsContent = document.getElementById('detailsContent');
+    const closeDetailsModal = document.getElementById('closeDetailsModal');
 
     addContactBtn.addEventListener('click', () => {
-        modalTitle.textContent = 'Add Contact';
+        contactModal.style.display = 'flex';
         contactId.value = '';
         contactName.value = '';
         contactEmail.value = '';
-        contactBirthday.value = '';
         contactPhone.value = '';
+        contactAddress.value = '';
+        contactBirthday.value = '';
+        contactRelationship.value = '';
         contactNote.value = '';
-        modal.style.display = 'flex';
-    });
-
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
     });
 
     editContactBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            modalTitle.textContent = 'Edit Contact';
             const id = btn.dataset.id;
 
-            contactId.value = id;
-            contactName.value = btn.parentElement.querySelector('p:nth-of-type(1)').textContent.split(': ')[1];
-            contactEmail.value = btn.parentElement.querySelector('p:nth-of-type(2)').textContent.split(': ')[1];
-            contactBirthday.value = btn.parentElement.querySelector('p:nth-of-type(3)').textContent.split(': ')[1];
-            contactPhone.value = 'Fake Phone'; // Replace with actual data
-            contactNote.value = 'Fake Note'; // Replace with actual data
+            fetch(`/friends/${id}/details`)
+                .then(response => response.json())
+                .then(data => {
+                    contactId.value = data.id;
+                    contactName.value = data.name;
+                    contactEmail.value = data.emailC;
+                    contactPhone.value = data.phone;
+                    contactAddress.value = data.address;
+                    contactBirthday.value = data.birthday;
+                    contactRelationship.value = data.relationship;
+                    contactNote.value = data.note;
 
-            modal.style.display = 'flex';
+                    contactModal.style.display = 'flex';
+                })
+                .catch(err => console.error('Failed to load contact details:', err));
+        });
+    });
+
+    detailsContactBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+
+            fetch(`/friends/${id}/details`)
+                .then(response => response.json())
+                .then(data => {
+                    detailsContent.innerHTML = `
+                        <p><strong>Name:</strong> ${data.name}</p>
+                        <p><strong>Email:</strong> ${data.emailC || 'N/A'}</p>
+                        <p><strong>Phone:</strong> ${data.phone || 'N/A'}</p>
+                        <p><strong>Address:</strong> ${data.address || 'N/A'}</p>
+                        <p><strong>Birthday:</strong> ${data.birthday || 'N/A'}</p>
+                        <p><strong>Relationship:</strong> ${data.relationship || 'N/A'}</p>
+                        <p><strong>Note:</strong> ${data.note || 'N/A'}</p>
+                    `;
+                    detailsModal.style.display = 'flex';
+                })
+                .catch(err => console.error('Failed to load contact details:', err));
+        });
+    });
+
+    deleteContactBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this contact?')) {
+                fetch(`/friends/${btn.dataset.id}/delete`, { method: 'POST' })
+                    .then(() => location.reload())
+                    .catch(err => console.error('Failed to delete contact:', err));
+            }
+        });
+    });
+
+    closeDetailsModal.addEventListener('click', () => {
+        detailsModal.style.display = 'none';
+    });
+
+    addInteractionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            interactionContactId.value = btn.dataset.id;
+            interactionModal.style.display = 'flex';
         });
     });
 
     window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
+        if (e.target === contactModal || e.target === detailsModal || e.target === interactionModal) {
+            contactModal.style.display = 'none';
+            detailsModal.style.display = 'none';
+            interactionModal.style.display = 'none';
         }
     });
 </script>
 </body>
 </html>
+
+
+
+
