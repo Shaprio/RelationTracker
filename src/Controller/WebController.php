@@ -172,6 +172,7 @@ class WebController extends AbstractController
 
         $user = new User();
         $user->setEmail($email);
+        $user->setName($name);
 
         $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
         $user->setPassword($hashedPassword);

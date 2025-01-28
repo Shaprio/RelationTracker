@@ -3,7 +3,7 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.53">
     <root id="1">
       <DateStyle>mdy</DateStyle>
-      <IntrospectionStateNumber>1108</IntrospectionStateNumber>
+      <IntrospectionStateNumber>1179</IntrospectionStateNumber>
       <ServerVersion>16.6</ServerVersion>
       <StartupTime>1738065862</StartupTime>
       <TimeZones>true ACDT
@@ -801,7 +801,7 @@ false posixrules
 13255||10|C|G
 13255||-9223372036854775808|U|G
 13255||10|U|G</Grants>
-      <IntrospectionStateNumber>1108</IntrospectionStateNumber>
+      <IntrospectionStateNumber>1179</IntrospectionStateNumber>
       <ObjectId>16384</ObjectId>
       <OwnerName>app</OwnerName>
     </database>
@@ -4225,8 +4225,8 @@ false posixrules
     <schema id="264" parent="2" name="public">
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <IntrospectionStateNumber>1108</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2025-01-28.14:16:39</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>1179</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2025-01-28.16:57:03</LastIntrospectionLocalTimestamp>
       <ObjectId>2200</ObjectId>
       <StateNumber>524</StateNumber>
       <OwnerName>pg_database_owner</OwnerName>
@@ -4359,7 +4359,7 @@ false posixrules
     </table>
     <table id="283" parent="264" name="user">
       <ObjectId>26219</ObjectId>
-      <StateNumber>1012</StateNumber>
+      <StateNumber>1178</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>app</OwnerName>
     </table>
@@ -5103,7 +5103,14 @@ false posixrules
       <StoredType>json|0s</StoredType>
       <TypeId>114</TypeId>
     </column>
-    <index id="386" parent="283" name="user_pkey">
+    <column id="386" parent="283" name="name">
+      <DefaultExpression>NULL::character varying</DefaultExpression>
+      <Position>8</Position>
+      <StateNumber>1178</StateNumber>
+      <StoredType>varchar(180)|0s</StoredType>
+      <TypeId>1043</TypeId>
+    </column>
+    <index id="387" parent="283" name="user_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>26225</ObjectId>
@@ -5112,7 +5119,7 @@ false posixrules
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="387" parent="283" name="uniq_8d93d649e7927c74">
+    <index id="388" parent="283" name="uniq_8d93d649e7927c74">
       <ColNames>email</ColNames>
       <ObjectId>26274</ObjectId>
       <StateNumber>1012</StateNumber>
@@ -5122,7 +5129,7 @@ false posixrules
       <CollationIds>100</CollationIds>
       <CollationParentNames>pg_catalog</CollationParentNames>
     </index>
-    <key id="388" parent="283" name="user_pkey">
+    <key id="389" parent="283" name="user_pkey">
       <NameSurrogate>1</NameSurrogate>
       <ObjectId>26226</ObjectId>
       <Primary>1</Primary>

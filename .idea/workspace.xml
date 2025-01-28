@@ -6,12 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="30291b5d-00c5-47c0-b830-1ece6b9a8b86" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/WebController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/WebController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/friends.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/friends.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/mainPage.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/mainPage.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/meetings.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/meetings.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/notifications.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/notifications.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/recurring-events.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/recurring-events.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entity/User.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/User.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -226,7 +221,7 @@
       <workItem from="1737806569941" duration="3197000" />
       <workItem from="1737985743794" duration="10470000" />
       <workItem from="1738053965292" duration="10235000" />
-      <workItem from="1738065824827" duration="15360000" />
+      <workItem from="1738065824827" duration="17048000" />
     </task>
     <servers />
   </component>

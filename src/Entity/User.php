@@ -21,6 +21,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $name = null; // <--- NOWE POLE
+
     #[ORM\Column]
     private ?string $password = null;
 
@@ -51,6 +54,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(?string $email): self
     {
         $this->email = $email;
+        return $this;
+    }
+
+    public function getName(): ?string // <--- GETTER
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): self // <--- SETTER
+    {
+        $this->name = $name;
         return $this;
     }
 
@@ -85,7 +99,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // Clear sensitive data
+        // Wyczyść poufne dane
     }
 
     /**
@@ -117,3 +131,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 }
+
