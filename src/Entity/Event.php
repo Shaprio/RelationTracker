@@ -47,6 +47,8 @@ class Event
     #[ORM\OneToMany(targetEntity: Reminder::class, mappedBy: 'eventR')]
     private Collection $reminders;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isImportant = false;
     public function __construct()
     {
         $this->contact = new ArrayCollection();
@@ -186,6 +188,18 @@ class Event
                 $reminder->setEventR(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getIsImportant(): bool
+    {
+        return $this->isImportant;
+    }
+
+    public function setIsImportant(bool $isImportant): self
+    {
+        $this->isImportant = $isImportant;
 
         return $this;
     }

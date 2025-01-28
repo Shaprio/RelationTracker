@@ -32,11 +32,7 @@
             gap: 0.5rem;
         }
 
-        .sidebar a:hover {
-            background-color: #3b5c87;
-        }
-
-        .sidebar a.active {
+        .sidebar a:hover, .sidebar a.active {
             background-color: #3b5c87;
             font-weight: bold;
         }
@@ -95,8 +91,8 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            overflow-y: auto; /* Dodanie przewijania */
-            max-height: calc(100vh - 150px); /* Ograniczenie wysokości */
+            overflow-y: auto;
+            max-height: calc(100vh - 150px);
         }
 
         .meeting-item {
@@ -105,7 +101,6 @@
             padding: 1rem;
             border-radius: 4px;
             font-weight: bold;
-            text-align: center;
             position: relative;
         }
 
@@ -122,6 +117,23 @@
         .meeting-item button:hover {
             background-color: #fff;
             color: #3b5c87;
+        }
+
+        .important-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 0.4rem 0.8rem;
+            background-color: #FFD700;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .important-btn.marked {
+            background-color: #FF4500;
+            color: white;
         }
 
         .modal {
@@ -142,24 +154,6 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 30%;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-        }
-
-        .modal-close {
-            cursor: pointer;
-            background-color: transparent;
-            border: none;
-            font-size: 1.5rem;
         }
 
         .modal form {
@@ -191,11 +185,11 @@
 </head>
 <body>
 <div class="sidebar">
-    <a href="/dashboard" class="dashboard-link">Dashboard</a>
-    <a href="/meetings" class="meetings-link active">Meetings</a>
-    <a href="/friends" class="friends-link">Friends</a>
-    <a href="/notifications" class="notifications-link">Notification</a>
-    <a href="/settings" class="settings-link">Settings</a>
+    <a href="/dashboard" class="{{ app.request.attributes.get('_route') == 'dashboard' ? 'active' : '' }}">Dashboard</a>
+    <a href="/meetings" class="{{ app.request.attributes.get('_route') == 'meetings' ? 'active' : '' }}">Meetings</a>
+    <a href="/friends" class="{{ app.request.attributes.get('_route') == 'friends' ? 'active' : '' }}">Friends</a>
+    <a href="/recurring-events" class="{{ app.request.attributes.get('_route') == 'recurring_events' ? 'active' : '' }}">Recurring Events</a>
+    <a href="/settings" class="{{ app.request.attributes.get('_route') == 'settings' ? 'active' : '' }}">Settings</a>
     <a href="/logout" class="logout">Logout</a>
 </div>
 
@@ -217,6 +211,11 @@
                     {% endfor %}
                 </p>
                 <button class="editEventBtn" data-id="{{ event.id }}">Edit</button>
+                <button class="important-btn {{ event.isImportant ? 'marked' : '' }}"
+                        data-id="{{ event.id }}"
+                        data-type="meeting">
+                    {{ event.isImportant ? 'Unmark Important' : 'Mark as Important' }}
+                </button>
             </div>
         {% endfor %}
     </div>
@@ -225,10 +224,6 @@
 <!-- Modal -->
 <div class="modal" id="eventModal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="modalTitle">Add Event</h2>
-            <button class="modal-close" id="closeModal">&times;</button>
-        </div>
         <form method="POST" action="/meetings">
             <input type="hidden" name="event_id" id="eventId">
             <input type="text" name="title" id="eventTitle" placeholder="Title" required>
@@ -246,49 +241,92 @@
 </div>
 
 <script>
+    // JavaScript logic for modal
     const modal = document.getElementById('eventModal');
     const addEventBtn = document.getElementById('addEventBtn');
-    const closeModal = document.getElementById('closeModal');
     const editEventBtns = document.querySelectorAll('.editEventBtn');
-    const modalTitle = document.getElementById('modalTitle');
-    const eventId = document.getElementById('eventId');
-    const eventTitle = document.getElementById('eventTitle');
-    const eventDescription = document.getElementById('eventDescription');
-    const eventDate = document.getElementById('eventDate');
-    const eventContacts = document.getElementById('eventContacts');
+    const importantBtns = document.querySelectorAll('.important-btn');
 
-    addEventBtn.addEventListener('click', () => {
-        modalTitle.textContent = 'Add Event';
-        eventId.value = '';
-        eventTitle.value = '';
-        eventDescription.value = '';
-        eventDate.value = '';
-        eventContacts.value = '';
-        modal.style.display = 'flex';
-    });
+    // Open Add Event Modal
+    if (addEventBtn) {
+        addEventBtn.addEventListener('click', () => {
+            if (modal) {
+                modal.style.display = 'flex';
+                document.getElementById('eventId').value = '';
+                document.getElementById('eventTitle').value = '';
+                document.getElementById('eventDescription').value = '';
+                document.getElementById('eventDate').value = '';
+            }
+        });
+    }
 
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
+    // Add Event Close Modal Logic
+    const closeModal = document.getElementById('closeModal');
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
 
+    // Edit Event Modal
     editEventBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            modalTitle.textContent = 'Edit Event';
-            const id = btn.dataset.id;
+            if (modal) {
+                modal.style.display = 'flex';
+                const parent = btn.closest('.meeting-item');
 
-            eventId.value = id;
-            eventTitle.value = btn.parentElement.querySelector('p:nth-of-type(1)').textContent.split(': ')[1];
-            eventDescription.value = btn.parentElement.querySelector('p:nth-of-type(2)').textContent.split(': ')[1];
-            eventDate.value = btn.parentElement.querySelector('p:nth-of-type(3)').textContent.split(': ')[1];
-            modal.style.display = 'flex';
+                // Populate the modal fields
+                document.getElementById('eventId').value = btn.getAttribute('data-id');
+                document.getElementById('eventTitle').value = parent.querySelector('p:nth-of-type(1)').textContent.split(': ')[1];
+                document.getElementById('eventDescription').value = parent.querySelector('p:nth-of-type(2)').textContent.split(': ')[1];
+                document.getElementById('eventDate').value = parent.querySelector('p:nth-of-type(3)').textContent.split(': ')[1];
+            }
         });
     });
 
+    // Toggle Important Logic
+    importantBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const eventId = btn.getAttribute('data-id');
+            const eventType = btn.getAttribute('data-type'); // meeting or recurring
+            const isImportant = btn.classList.contains('marked');
+
+            // Determine the correct API endpoint based on type
+            const url = eventType === 'meeting'
+                ? `/meetings/${eventId}/important`
+                : `/recurring-events/${eventId}/important`;
+
+            // Send POST request to toggle importance
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ important: !isImportant })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to update importance');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        btn.classList.toggle('marked');
+                        btn.textContent = isImportant
+                            ? 'Mark as Important'
+                            : 'Unmark Important';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Close Modal on Outside Click
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.style.display = 'none';
         }
     });
 </script>
+
 </body>
 </html>

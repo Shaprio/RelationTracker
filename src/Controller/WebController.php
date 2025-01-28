@@ -11,12 +11,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\User;
 use App\Entity\Contact;
 use App\Entity\Event;
 use App\Entity\EventContact;
 use App\Entity\RecurringEvent;
 use App\Entity\RecurringEventContact;
+
 
 
 
@@ -318,18 +320,59 @@ class WebController extends AbstractController
 
 
 
-    #[Route('/notifications', name: 'notifications', methods: ['GET'])]
-    #[OA\Get(
-        path: '/notifications',
-        summary: 'Render notifications page',
-        responses: [
-            new OA\Response(response: 200, description: 'Notifications page rendered')
-        ]
-    )]
-    public function notifications(): Response
+    #[Route('/notifications', name: 'notifications')]
+    public function notifications(EntityManagerInterface $entityManager, Security $security): Response
     {
-        return $this->render('notifications.html.twig');
+        $user = $security->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('login'); // Redirect to login if user is not authenticated
+        }
+
+        // Fetch important meetings
+        $importantMeetings = $entityManager->getRepository(Event::class)->findBy([
+            'userE' => $user,
+            'isImportant' => true,
+        ]);
+
+        // Convert meetings into an array with additional type info
+        $meetings = array_map(function ($meeting) {
+            return [
+                'type' => 'Meeting',
+                'title' => $meeting->getTitle(),
+                'date' => $meeting->getDate(),
+                'description' => $meeting->getDescription(),
+            ];
+        }, $importantMeetings);
+
+        // Fetch important recurring events
+        $importantRecurringEvents = $entityManager->getRepository(RecurringEvent::class)->findBy([
+            'owner' => $user,
+            'isImportant' => true,
+        ]);
+
+        // Convert recurring events into an array with additional type info
+        $recurringEvents = array_map(function ($recurringEvent) {
+            return [
+                'type' => 'Recurring Event',
+                'title' => $recurringEvent->getTitle(),
+                'date' => $recurringEvent->getStartDate(),
+                'description' => $recurringEvent->getDescription(),
+            ];
+        }, $importantRecurringEvents);
+
+        // Merge and sort the events by date
+        $allEvents = array_merge($meetings, $recurringEvents);
+
+        usort($allEvents, function ($a, $b) {
+            return $a['date'] <=> $b['date'];
+        });
+
+        return $this->render('notifications.html.twig', [
+            'events' => $allEvents,
+        ]);
     }
+
 
     #[Route('/settings', name: 'settings', methods: ['GET'])]
     #[OA\Get(
@@ -430,6 +473,56 @@ class WebController extends AbstractController
             'contacts' => $contacts,
         ]);
     }
+
+    #[Route('/toggle-important', name: 'toggle_important', methods: ['POST'])]
+    public function toggleImportant(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $eventId = $request->request->get('event_id');
+        $eventType = $request->request->get('event_type'); // 'meeting' or 'recurring'
+
+        $event = null;
+        if ($eventType === 'meeting') {
+            $event = $entityManager->getRepository(Event::class)->find($eventId);
+        } elseif ($eventType === 'recurring') {
+            $event = $entityManager->getRepository(RecurringEvent::class)->find($eventId);
+        }
+
+        if ($event) {
+            $event->setIsImportant(!$event->getIsImportant()); // Toggle important flag
+            $entityManager->flush();
+
+            return new JsonResponse(['success' => true, 'isImportant' => $event->getIsImportant()]);
+        }
+
+        return new JsonResponse(['success' => false], 400);
+    }
+
+    #[Route('/recurring-events/{id}/important', name: 'mark_recurring_event_important', methods: ['POST'])]
+    public function markRecurringEventImportant(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $event = $entityManager->getRepository(RecurringEvent::class)->find($id);
+
+        if (!$event) {
+            return new JsonResponse(['success' => false, 'message' => 'Event not found'], 404);
+        }
+
+        $event->setIsImportant(!$event->getIsImportant());
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true, 'isImportant' => $event->getIsImportant()]);
+    }
+
+    #[Route('/meetings/{id}/important', name: 'meeting_toggle_important', methods: ['POST'])]
+    public function toggleMeetingImportant(Event $event, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $event->setIsImportant(!$event->getIsImportant()); // Toggle the isImportant flag
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true, 'isImportant' => $event->getIsImportant()]);
+    }
+
+
+
 
 }
 

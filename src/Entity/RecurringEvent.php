@@ -36,7 +36,7 @@ class RecurringEvent
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $updatedAt = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'recurringEvents')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
@@ -46,6 +46,8 @@ class RecurringEvent
     #[ORM\OneToMany(targetEntity: RecurringEventContact::class, mappedBy: 'recurringEvent', cascade: ['persist', 'remove'])]
     private Collection $contacts;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isImportant = false;
     public function __construct()
     {
         $this->contacts = new ArrayCollection();
@@ -64,7 +66,6 @@ class RecurringEvent
     public function setTitle(string $title): self
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -76,7 +77,6 @@ class RecurringEvent
     public function setDescription(?string $description): self
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -88,7 +88,6 @@ class RecurringEvent
     public function setRecurrencePattern(string $recurrencePattern): self
     {
         $this->recurrencePattern = $recurrencePattern;
-
         return $this;
     }
 
@@ -100,7 +99,6 @@ class RecurringEvent
     public function setStartDate(\DateTimeInterface $startDate): self
     {
         $this->startDate = $startDate;
-
         return $this;
     }
 
@@ -112,7 +110,6 @@ class RecurringEvent
     public function setEndDate(?\DateTimeInterface $endDate): self
     {
         $this->endDate = $endDate;
-
         return $this;
     }
 
@@ -124,7 +121,6 @@ class RecurringEvent
     public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -136,7 +132,6 @@ class RecurringEvent
     public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
-
         return $this;
     }
 
@@ -148,7 +143,6 @@ class RecurringEvent
     public function setOwner(?User $owner): self
     {
         $this->owner = $owner;
-
         return $this;
     }
 
@@ -180,4 +174,16 @@ class RecurringEvent
 
         return $this;
     }
+    public function getIsImportant(): bool
+    {
+        return $this->isImportant;
+    }
+
+    public function setIsImportant(bool $isImportant): self
+    {
+        $this->isImportant = $isImportant;
+
+        return $this;
+    }
 }
+
