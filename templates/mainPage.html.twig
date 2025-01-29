@@ -1,206 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard - Main Page</title>
-    <style>
-        /* Reset/bazowe style */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+{# templates/mainPage.html.twig #}
+{% extends 'base.html.twig' %}
 
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            margin: 0;
-            height: 100vh;
-            background-color: #f9f9f9;
-        }
-        h2, h3, p {
-            margin: 0;
-        }
+{% block title %}
+    Dashboard - Main Page
+{% endblock %}
 
-        /* Sidebar */
-        .sidebar {
-            width: 15%;
-            background-color: #1E3A5F;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-        }
-        .sidebar a {
-            text-decoration: none;
-            color: #fff;
-            padding: 0.8rem 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.2s;
-        }
-        .sidebar a:hover {
-            background-color: #3b5c87;
-        }
-        .sidebar .logout {
-            margin-top: auto;
-            background-color: #FF6666;
-            text-align: center;
-            border-radius: 4px;
-        }
+{% block content %}
 
-        /* Główna zawartość */
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 2rem;
-            gap: 2rem;
-        }
-
-        /* Sekcja powitalna i statystyki */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .welcome-box {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .stats {
-            display: flex;
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-        .stat-box {
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            padding: 1rem;
-            width: 7rem;
-            text-align: center;
-        }
-        .stat-box h2 {
-            font-size: 2rem;
-            margin-bottom: 0.3rem;
-        }
-        .stat-box p {
-            font-size: 0.9rem;
-            color: #555;
-        }
-
-        /* Sekcja główna (dwie kolumny) */
-        .main-sections {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        /* Lewa kolumna */
-        .left-column {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        /* Karty (np. Birthdays, inne eventy, keep in touch) */
-        .card {
-            background-color: #76B6F8;
-            color: #fff;
-            border-radius: 8px;
-            padding: 1rem;
-        }
-        .card h3 {
-            margin-bottom: 0.5rem;
-        }
-        .card p {
-            margin-bottom: 0.3rem;
-        }
-
-        /* Prawa kolumna */
-        .right-column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .create-event-btn {
-            background-color: #1E3A5F;
-            color: #fff;
-            border: none;
-            padding: 0.8rem 1.2rem;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .create-event-btn:hover {
-            background-color: #3b5c87;
-        }
-
-        /* Kalendarz */
-        .calendar-box {
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            padding: 1rem;
-        }
-        .calendar-box h3 {
-            margin-bottom: 1rem;
-        }
-
-        /* Dzisiejsze wydarzenia */
-        .today-events {
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            padding: 1rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .today-events h3 {
-            margin-bottom: 1rem;
-        }
-        .event-tile {
-            background-color: #76B6F8;
-            color: #fff;
-            padding: 0.5rem;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Wydarzenia w tym tygodniu i Birthday, Reconnect */
-        .item-list {
-            margin-top: 0.5rem;
-        }
-        .item-list .list-item {
-            background-color: rgba(255,255,255,0.2);
-            margin-bottom: 0.3rem;
-            padding: 0.5rem;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body>
-<div class="sidebar">
-    <a href="/mainPage" class="active">Dashboard</a>
-    <a href="/meetings">Meetings</a>
-    <a href="/friends">Friends</a>
-    <a href="/notifications">Notifications</a>
-    <a href="/recurring-events">Recurring Events</a>
-    <a href="/settings">Settings</a>
-    <a href="/logout" class="logout">Logout</a>
-</div>
-
-<div class="content">
     <!-- Góra: powitanie + przycisk tworzenia eventu + statystyki -->
     <div class="top-bar">
         <div>
-            <div class="welcome-box">Hello, {{ app.user.name }}! It's good to see you again.</div>
+            <div class="welcome-box">
+                Hello, {{ app.user.name }}! It's good to see you again.
+            </div>
             <div class="stats">
                 <div class="stat-box">
                     <h2>{{ eventsCountThisMonth|default('0') }}</h2>
@@ -231,9 +43,18 @@
                 <div class="item-list">
                     {% for e in eventsThisWeek %}
                         <div class="list-item">{{ e.title }} — {{ e.date|date('Y-m-d H:i') }}</div>
+                    {% else %}
+                        <p>No events found for this week.</p>
                     {% endfor %}
+
                     {% for r in recurringThisWeek %}
                         <div class="list-item">{{ r.title }} — {{ r.startDate|date('Y-m-d') }}</div>
+                    {% else %}
+                        {#
+                        Uwaga: Drugi blok "else" w jednej pętli jest niedozwolony w
+                        Twigu. Lepiej scalić w jedną listę, lub zrobić drugą pętlę
+                        z innym wcięciem logicznym.
+                        #}
                     {% endfor %}
                 </div>
             </div>
@@ -285,7 +106,11 @@
             </div>
         </div>
     </div>
-</div>
-</body>
-</html>
 
+{% endblock %}
+
+
+{% block javascripts %}
+    <script>
+    </script>
+{% endblock %}

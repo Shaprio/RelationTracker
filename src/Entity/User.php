@@ -36,6 +36,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: RecurringEvent::class, cascade: ['persist', 'remove'])]
     private Collection $recurringEvents;
 
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Setting::class)]
+    private ?Setting $setting = null;
+
     public function __construct()
     {
         $this->recurringEvents = new ArrayCollection();
@@ -126,6 +129,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($recurringEvent->getOwner() === $this) {
                 $recurringEvent->setOwner(null);
             }
+        }
+
+        return $this;
+    }
+    public function getSetting(): ?Setting
+    {
+        return $this->setting;
+    }
+
+    public function setSetting(?Setting $setting): self
+    {
+        $this->setting = $setting;
+
+        // Upewniamy się, że po stronie Setting także jest ustawiony user:
+        if ($setting && $setting->getUser() !== $this) {
+            $setting->setUser($this);
         }
 
         return $this;

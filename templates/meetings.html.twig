@@ -1,200 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard - Meetings</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            margin: 0;
-            height: 100vh;
-            background-color: #f9f9f9;
-        }
+{# templates/meetings.html.twig #}
+{% extends 'base.html.twig' %}
 
-        .sidebar {
-            width: 15%;
-            background-color: #1E3A5F;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-        }
+{% block title %}
+    Meetings
+{% endblock %}
 
-        .sidebar a {
-            text-decoration: none;
-            color: #fff;
-            padding: 0.8rem 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .sidebar a:hover, .sidebar a.active {
-            background-color: #3b5c87;
-            font-weight: bold;
-        }
-
-        .sidebar .logout {
-            margin-top: auto;
-            background-color: #FF6666;
-            padding: 0.8rem 1rem;
-            text-align: center;
-            border-radius: 4px;
-        }
-
-        .content {
-            flex: 1;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
-        .header button {
-            padding: 0.6rem 1rem;
-            background-color: #1E3A5F;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .header button:hover {
-            background-color: #3b5c87;
-        }
-
-        .meeting-list {
-            background-color: #f5f5f5;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            overflow-y: auto;
-            max-height: calc(100vh - 150px);
-        }
-
-        .meeting-item {
-            background-color: #76B6F8;
-            color: white;
-            padding: 1rem;
-            border-radius: 4px;
-            font-weight: bold;
-            position: relative;
-        }
-
-        .meeting-item button {
-            margin-top: 0.5rem;
-            padding: 0.5rem 1rem;
-            background-color: white;
-            color: #76B6F8;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .meeting-item button:hover {
-            background-color: #fff;
-            color: #3b5c87;
-        }
-
-        .important-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 0.4rem 0.8rem;
-            background-color: #FFD700;
-            color: black;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .important-btn.marked {
-            background-color: #FF4500;
-            color: white;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 30%;
-        }
-
-        .modal form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .modal input, .modal textarea, .modal select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .modal button {
-            padding: 0.5rem;
-            background-color: #1E3A5F;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .modal button:hover {
-            background-color: #3b5c87;
-        }
-    </style>
-</head>
-<body>
-<div class="sidebar">
-    <a href="/mainPage">Dashboard</a>
-    <a href="/meetings">Meetings</a>
-    <a href="/friends">Friends</a>
-    <a href="/notifications" class="active">Notifications</a>
-    <a href="/recurring-events">Recurring Events</a>
-    <a href="/settings">Settings</a>
-    <a href="/logout" class="logout">Logout</a>
-</div>
-
-<div class="content">
+{% block content %}
     <div class="header">
         <h1>Meetings</h1>
         <button id="addEventBtn">Add New Event</button>
@@ -212,122 +23,141 @@
                     {% endfor %}
                 </p>
                 <button class="editEventBtn" data-id="{{ event.id }}">Edit</button>
-                <button class="important-btn {{ event.isImportant ? 'marked' : '' }}"
-                        data-id="{{ event.id }}"
-                        data-type="meeting">
+                <button
+                    class="important-btn {{ event.isImportant ? 'marked' : '' }}"
+                    data-id="{{ event.id }}"
+                    data-type="meeting"
+                >
                     {{ event.isImportant ? 'Unmark Important' : 'Mark as Important' }}
                 </button>
             </div>
+        {% else %}
+            <p>No meetings available.</p>
         {% endfor %}
     </div>
-</div>
 
-<!-- Modal -->
-<div class="modal" id="eventModal">
-    <div class="modal-content">
-        <form method="POST" action="/meetings">
-            <input type="hidden" name="event_id" id="eventId">
-            <input type="text" name="title" id="eventTitle" placeholder="Title" required>
-            <textarea name="description" id="eventDescription" placeholder="Description"></textarea>
-            <input type="date" name="date" id="eventDate" required>
-            <label>Contacts:</label>
-            <select name="contacts[]" id="eventContacts" multiple>
-                {% for contact in contacts %}
-                    <option value="{{ contact.id }}">{{ contact.name }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit">Save</button>
-        </form>
+    <!-- Modal -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <!-- Zamykamy modal przyciskiem? Zdefiniuj go, jeśli chcesz -->
+            <!-- <button id="closeModal">Close</button> -->
+
+            <form method="POST" action="/meetings">
+                <input type="hidden" name="event_id" id="eventId">
+                <input type="text" name="title" id="eventTitle" placeholder="Title" required>
+                <textarea name="description" id="eventDescription" placeholder="Description"></textarea>
+                <input type="date" name="date" id="eventDate" required>
+                <label>Contacts:</label>
+                <select name="contacts[]" id="eventContacts" multiple>
+                    {% for contact in contacts %}
+                        <option value="{{ contact.id }}">{{ contact.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Save</button>
+            </form>
+        </div>
     </div>
-</div>
+{% endblock %}
 
-<script>
-    // JavaScript logic for modal
-    const modal = document.getElementById('eventModal');
-    const addEventBtn = document.getElementById('addEventBtn');
-    const editEventBtns = document.querySelectorAll('.editEventBtn');
-    const importantBtns = document.querySelectorAll('.important-btn');
+{% block javascripts %}
+    <script>
+        // JavaScript logic for modal
+        const modal = document.getElementById('eventModal');
+        const addEventBtn = document.getElementById('addEventBtn');
+        const editEventBtns = document.querySelectorAll('.editEventBtn');
+        const importantBtns = document.querySelectorAll('.important-btn');
 
-    // Open Add Event Modal
-    if (addEventBtn) {
-        addEventBtn.addEventListener('click', () => {
-            if (modal) {
-                modal.style.display = 'flex';
-                document.getElementById('eventId').value = '';
-                document.getElementById('eventTitle').value = '';
-                document.getElementById('eventDescription').value = '';
-                document.getElementById('eventDate').value = '';
-            }
+        // Open Add Event Modal
+        if (addEventBtn) {
+            addEventBtn.addEventListener('click', () => {
+                if (modal) {
+                    modal.style.display = 'flex';
+                    document.getElementById('eventId').value = '';
+                    document.getElementById('eventTitle').value = '';
+                    document.getElementById('eventDescription').value = '';
+                    document.getElementById('eventDate').value = '';
+
+                    // Odczytaj #eventContacts i wyczyść zaznaczenia
+                    const eventContacts = document.getElementById('eventContacts');
+                    Array.from(eventContacts.options).forEach(option => {
+                        option.selected = false;
+                    });
+                }
+            });
+        }
+
+        // (Optional) If you have a "closeModal" button inside the form
+        const closeModal = document.getElementById('closeModal');
+        if (closeModal) {
+            closeModal.addEventListener('click', () => {
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Edit Event Modal
+        editEventBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (modal) {
+                    modal.style.display = 'flex';
+                    const parent = btn.closest('.meeting-item');
+
+                    // Populate the modal fields
+                    document.getElementById('eventId').value =
+                        btn.getAttribute('data-id') || '';
+                    document.getElementById('eventTitle').value =
+                        parent.querySelector('p:nth-of-type(1)').textContent.split(': ')[1] || '';
+                    document.getElementById('eventDescription').value =
+                        parent.querySelector('p:nth-of-type(2)').textContent.split(': ')[1] || '';
+                    document.getElementById('eventDate').value =
+                        parent.querySelector('p:nth-of-type(3)').textContent.split(': ')[1] || '';
+
+                    // #eventContacts - bez detali, bo np. nie mamy przypisanych kontaktów w HTML p
+                }
+            });
         });
-    }
 
-    // Add Event Close Modal Logic
-    const closeModal = document.getElementById('closeModal');
-    if (closeModal) {
-        closeModal.addEventListener('click', () => {
-            if (modal) {
+        // Toggle Important Logic
+        importantBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const eventId = btn.getAttribute('data-id');
+                const eventType = btn.getAttribute('data-type'); // "meeting" or "recurring"
+                const isImportant = btn.classList.contains('marked');
+
+                // Determine the correct API endpoint based on type
+                const url = (eventType === 'meeting')
+                    ? `/meetings/${eventId}/important`
+                    : `/recurring-events/${eventId}/important`;
+
+                // Send POST request to toggle importance
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ important: !isImportant })
+                })
+                    .then(response => {
+                        if (!response.ok)
+                            throw new Error('Failed to update importance');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            btn.classList.toggle('marked');
+                            btn.textContent = isImportant
+                                ? 'Mark as Important'
+                                : 'Unmark Important';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+
+        // Close Modal on Outside Click
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
                 modal.style.display = 'none';
             }
         });
-    }
-
-    // Edit Event Modal
-    editEventBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (modal) {
-                modal.style.display = 'flex';
-                const parent = btn.closest('.meeting-item');
-
-                // Populate the modal fields
-                document.getElementById('eventId').value = btn.getAttribute('data-id');
-                document.getElementById('eventTitle').value = parent.querySelector('p:nth-of-type(1)').textContent.split(': ')[1];
-                document.getElementById('eventDescription').value = parent.querySelector('p:nth-of-type(2)').textContent.split(': ')[1];
-                document.getElementById('eventDate').value = parent.querySelector('p:nth-of-type(3)').textContent.split(': ')[1];
-            }
-        });
-    });
-
-    // Toggle Important Logic
-    importantBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const eventId = btn.getAttribute('data-id');
-            const eventType = btn.getAttribute('data-type'); // meeting or recurring
-            const isImportant = btn.classList.contains('marked');
-
-            // Determine the correct API endpoint based on type
-            const url = eventType === 'meeting'
-                ? `/meetings/${eventId}/important`
-                : `/recurring-events/${eventId}/important`;
-
-            // Send POST request to toggle importance
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ important: !isImportant })
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to update importance');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        btn.classList.toggle('marked');
-                        btn.textContent = isImportant
-                            ? 'Mark as Important'
-                            : 'Unmark Important';
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
-    });
-
-    // Close Modal on Outside Click
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-</script>
-
-</body>
-</html>
+    </script>
+{% endblock %}

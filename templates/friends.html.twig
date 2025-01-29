@@ -1,198 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard - Friends</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            margin: 0;
-            height: 100vh;
-            background-color: #f9f9f9;
-        }
+{# templates/friends.html.twig #}
+{% extends 'base.html.twig' %}
 
-        .sidebar {
-            width: 15%;
-            background-color: #1E3A5F;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-        }
+{% block title %}
+    Friends
+{% endblock %}
 
-        .sidebar a {
-            text-decoration: none;
-            color: #fff;
-            padding: 0.8rem 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-        }
+{% block content %}
 
-        .sidebar a:hover {
-            background-color: #3b5c87;
-        }
-
-        .sidebar .logout {
-            margin-top: auto;
-            background-color: #FF6666;
-            padding: 0.8rem 1rem;
-            text-align: center;
-            border-radius: 4px;
-        }
-
-        .content {
-            flex: 1;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .header button {
-            padding: 0.6rem 1.2rem;
-            background-color: #1E3A5F;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .header button:hover {
-            background-color: #3b5c87;
-        }
-
-        .friend-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            max-height: 60vh; /* Enable scrolling */
-            overflow-y: auto;
-            background-color: #f5f5f5;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .friend-grid::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .friend-grid::-webkit-scrollbar-thumb {
-            background-color: #76B6F8;
-            border-radius: 4px;
-        }
-
-        .friend-grid::-webkit-scrollbar-thumb:hover {
-            background-color: #3b5c87;
-        }
-
-        .friend-item {
-            background-color: #76B6F8;
-            color: white;
-            padding: 1rem;
-            border-radius: 4px;
-            font-weight: bold;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .button-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.5rem;
-        }
-
-        .friend-item button {
-            padding: 0.5rem 1rem;
-            background-color: white;
-            color: #76B6F8;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .friend-item button:hover {
-            background-color: #fff;
-            color: #3b5c87;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 30%;
-        }
-
-        .modal-content form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .modal-content input, .modal-content select, .modal-content textarea {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .modal-content button {
-            padding: 0.5rem 1rem;
-            background-color: #1E3A5F;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .modal-content button:hover {
-            background-color: #3b5c87;
-        }
-    </style>
-</head>
-<body>
-<div class="sidebar">
-    <a href="/mainPage">Dashboard</a>
-    <a href="/meetings">Meetings</a>
-    <a href="/friends">Friends</a>
-    <a href="/notifications" class="active">Notifications</a>
-    <a href="/recurring-events">Recurring Events</a>
-    <a href="/settings">Settings</a>
-    <a href="/logout" class="logout">Logout</a>
-</div>
-
-<div class="content">
     <div class="header">
         <h1>Friends</h1>
         <button id="addContactBtn">Add New Contact</button>
@@ -209,115 +23,116 @@
                     <button class="deleteContactBtn" data-id="{{ contact.id }}">Delete</button>
                 </div>
             </div>
+        {% else %}
+            <p>No contacts available.</p>
         {% endfor %}
     </div>
-</div>
 
-<!-- Modals -->
-<div class="modal" id="contactModal">
-    <div class="modal-content">
-        <h2 id="modalTitle">Add Contact</h2>
-        <form method="POST" action="/friends">
-            <input type="hidden" name="action" value="save_contact">
-            <input type="hidden" name="contact_id" id="contactId">
-            <input type="text" name="name" id="contactName" placeholder="Name" required>
-            <input type="email" name="email" id="contactEmail" placeholder="Email">
-            <input type="text" name="phone" id="contactPhone" placeholder="Phone">
-            <input type="text" name="address" id="contactAddress" placeholder="Address">
-            <input type="date" name="birthday" id="contactBirthday">
-            <input type="text" name="relationship" id="contactRelationship" placeholder="Relationship">
-            <textarea name="note" id="contactNote" placeholder="Note"></textarea>
-            <button type="submit">Save Contact</button>
-        </form>
+    <!-- Modals -->
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Add Contact</h2>
+            <form method="POST" action="/friends">
+                <input type="hidden" name="action" value="save_contact">
+                <input type="hidden" name="contact_id" id="contactId">
+                <input type="text" name="name" id="contactName" placeholder="Name" required>
+                <input type="email" name="email" id="contactEmail" placeholder="Email">
+                <input type="text" name="phone" id="contactPhone" placeholder="Phone">
+                <input type="text" name="address" id="contactAddress" placeholder="Address">
+                <input type="date" name="birthday" id="contactBirthday">
+                <input type="text" name="relationship" id="contactRelationship" placeholder="Relationship">
+                <textarea name="note" id="contactNote" placeholder="Note"></textarea>
+                <button type="submit">Save Contact</button>
+            </form>
+        </div>
     </div>
-</div>
 
-<div class="modal" id="detailsModal">
-    <div class="modal-content">
-        <h2>Contact Details</h2>
-        <p id="detailsContent"></p>
-        <button id="closeDetailsModal">Close</button>
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <h2>Contact Details</h2>
+            <p id="detailsContent"></p>
+            <button id="closeDetailsModal">Close</button>
+        </div>
     </div>
-</div>
 
-<div class="modal" id="interactionModal">
-    <div class="modal-content">
-        <h2>Add Interaction</h2>
-        <form method="POST" action="/friends/interact">
-            <input type="hidden" name="contact_id" id="interactionContactId">
-            <label for="initiatedBy">Initiated By:</label>
-            <select name="initiatedBy" id="interactionInitiatedBy">
-                <option value="self">Self</option>
-                <option value="friend">Friend</option>
-            </select>
-            <button type="submit">Save Interaction</button>
-        </form>
+    <div class="modal" id="interactionModal">
+        <div class="modal-content">
+            <h2>Add Interaction</h2>
+            <form method="POST" action="/friends/interact">
+                <input type="hidden" name="contact_id" id="interactionContactId">
+                <label for="initiatedBy">Initiated By:</label>
+                <select name="initiatedBy" id="interactionInitiatedBy">
+                    <option value="self">Self</option>
+                    <option value="friend">Friend</option>
+                </select>
+                <button type="submit">Save Interaction</button>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-    const contactModal = document.getElementById('contactModal');
-    const detailsModal = document.getElementById('detailsModal');
-    const interactionModal = document.getElementById('interactionModal');
-    const addContactBtn = document.getElementById('addContactBtn');
-    const addInteractionBtns = document.querySelectorAll('.addInteractionBtn');
-    const editContactBtns = document.querySelectorAll('.editContactBtn');
-    const detailsContactBtns = document.querySelectorAll('.detailsContactBtn');
-    const deleteContactBtns = document.querySelectorAll('.deleteContactBtn');
-    const interactionContactId = document.getElementById('interactionContactId');
-    const contactId = document.getElementById('contactId');
-    const contactName = document.getElementById('contactName');
-    const contactEmail = document.getElementById('contactEmail');
-    const contactPhone = document.getElementById('contactPhone');
-    const contactAddress = document.getElementById('contactAddress');
-    const contactBirthday = document.getElementById('contactBirthday');
-    const contactRelationship = document.getElementById('contactRelationship');
-    const contactNote = document.getElementById('contactNote');
-    const detailsContent = document.getElementById('detailsContent');
-    const closeDetailsModal = document.getElementById('closeDetailsModal');
+{% endblock %}
 
-    addContactBtn.addEventListener('click', () => {
-        contactModal.style.display = 'flex';
-        contactId.value = '';
-        contactName.value = '';
-        contactEmail.value = '';
-        contactPhone.value = '';
-        contactAddress.value = '';
-        contactBirthday.value = '';
-        contactRelationship.value = '';
-        contactNote.value = '';
-    });
+{% block javascripts %}
+    <script>
+        const contactModal = document.getElementById('contactModal');
+        const detailsModal = document.getElementById('detailsModal');
+        const interactionModal = document.getElementById('interactionModal');
+        const addContactBtn = document.getElementById('addContactBtn');
+        const addInteractionBtns = document.querySelectorAll('.addInteractionBtn');
+        const editContactBtns = document.querySelectorAll('.editContactBtn');
+        const detailsContactBtns = document.querySelectorAll('.detailsContactBtn');
+        const deleteContactBtns = document.querySelectorAll('.deleteContactBtn');
+        const interactionContactId = document.getElementById('interactionContactId');
+        const contactId = document.getElementById('contactId');
+        const contactName = document.getElementById('contactName');
+        const contactEmail = document.getElementById('contactEmail');
+        const contactPhone = document.getElementById('contactPhone');
+        const contactAddress = document.getElementById('contactAddress');
+        const contactBirthday = document.getElementById('contactBirthday');
+        const contactRelationship = document.getElementById('contactRelationship');
+        const contactNote = document.getElementById('contactNote');
+        const detailsContent = document.getElementById('detailsContent');
+        const closeDetailsModal = document.getElementById('closeDetailsModal');
 
-    editContactBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
-
-            fetch(`/friends/${id}/details`)
-                .then(response => response.json())
-                .then(data => {
-                    contactId.value = data.id;
-                    contactName.value = data.name;
-                    contactEmail.value = data.emailC;
-                    contactPhone.value = data.phone;
-                    contactAddress.value = data.address;
-                    contactBirthday.value = data.birthday;
-                    contactRelationship.value = data.relationship;
-                    contactNote.value = data.note;
-
-                    contactModal.style.display = 'flex';
-                })
-                .catch(err => console.error('Failed to load contact details:', err));
+        addContactBtn.addEventListener('click', () => {
+            contactModal.style.display = 'flex';
+            contactId.value = '';
+            contactName.value = '';
+            contactEmail.value = '';
+            contactPhone.value = '';
+            contactAddress.value = '';
+            contactBirthday.value = '';
+            contactRelationship.value = '';
+            contactNote.value = '';
         });
-    });
 
-    detailsContactBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = btn.dataset.id;
+        editContactBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id;
+                fetch(`/friends/${id}/details`)
+                    .then(response => response.json())
+                    .then(data => {
+                        contactId.value = data.id;
+                        contactName.value = data.name;
+                        contactEmail.value = data.emailC;
+                        contactPhone.value = data.phone;
+                        contactAddress.value = data.address;
+                        contactBirthday.value = data.birthday;
+                        contactRelationship.value = data.relationship;
+                        contactNote.value = data.note;
+                        contactModal.style.display = 'flex';
+                    })
+                    .catch(err => console.error('Failed to load contact details:', err));
+            });
+        });
 
-            fetch(`/friends/${id}/details`)
-                .then(response => response.json())
-                .then(data => {
-                    detailsContent.innerHTML = `
+        detailsContactBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id;
+                fetch(`/friends/${id}/details`)
+                    .then(response => response.json())
+                    .then(data => {
+                        detailsContent.innerHTML = `
                         <p><strong>Name:</strong> ${data.name}</p>
                         <p><strong>Email:</strong> ${data.emailC || 'N/A'}</p>
                         <p><strong>Phone:</strong> ${data.phone || 'N/A'}</p>
@@ -326,44 +141,43 @@
                         <p><strong>Relationship:</strong> ${data.relationship || 'N/A'}</p>
                         <p><strong>Note:</strong> ${data.note || 'N/A'}</p>
                     `;
-                    detailsModal.style.display = 'flex';
-                })
-                .catch(err => console.error('Failed to load contact details:', err));
+                        detailsModal.style.display = 'flex';
+                    })
+                    .catch(err => console.error('Failed to load contact details:', err));
+            });
         });
-    });
 
-    deleteContactBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to delete this contact?')) {
-                fetch(`/friends/${btn.dataset.id}/delete`, { method: 'POST' })
-                    .then(() => location.reload())
-                    .catch(err => console.error('Failed to delete contact:', err));
+        deleteContactBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete this contact?')) {
+                    fetch(`/friends/${btn.dataset.id}/delete`, { method: 'POST' })
+                        .then(() => location.reload())
+                        .catch(err => console.error('Failed to delete contact:', err));
+                }
+            });
+        });
+
+        closeDetailsModal.addEventListener('click', () => {
+            detailsModal.style.display = 'none';
+        });
+
+        addInteractionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                interactionContactId.value = btn.dataset.id;
+                interactionModal.style.display = 'flex';
+            });
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === contactModal) {
+                contactModal.style.display = 'none';
+            }
+            if (e.target === detailsModal) {
+                detailsModal.style.display = 'none';
+            }
+            if (e.target === interactionModal) {
+                interactionModal.style.display = 'none';
             }
         });
-    });
-
-    closeDetailsModal.addEventListener('click', () => {
-        detailsModal.style.display = 'none';
-    });
-
-    addInteractionBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            interactionContactId.value = btn.dataset.id;
-            interactionModal.style.display = 'flex';
-        });
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target === contactModal || e.target === detailsModal || e.target === interactionModal) {
-            contactModal.style.display = 'none';
-            detailsModal.style.display = 'none';
-            interactionModal.style.display = 'none';
-        }
-    });
-</script>
-</body>
-</html>
-
-
-
-
+    </script>
+{% endblock %}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Auth{% endblock %}</title>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <style>
+        /* Ustawienie flexboxa dla kontenera */
+        .auth-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Stylowanie lewej sekcji (logo + nagłówek) */
+        .left-section {
+            width: 50%;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        /* Stylowanie prawej sekcji (formularze) */
+        .right-section {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Stylowanie przycisków */
+        .signup-button, .login-button {
+            background-color: #1E3A5F;
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-top: 1rem;
+            border: none;
+            display: inline-block;
+        }
+
+        .signup-button:hover, .login-button:hover {
+            background-color: #3b5c87;
+        }
+
+        /* Formularz */
+        .form-group {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Dodatkowe linki (Forgot password, etc.) */
+        .extra-links {
+            margin-top: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="auth-container">
+    <div class="left-section">
+        <div class="logo">TEMP LOGO</div>
+        <h1>{% block heading %}Welcome{% endblock %}</h1>
+        <a href="{% block action_link_path %}{{ path('register') }}{% endblock %}" class="signup-button">
+            {% block action_link_text %}Sign up{% endblock %}
+        </a>
+    </div>
+    <div class="right-section">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+</head>
+<body
+    class="
+    {% if app.user and app.user.setting %}
+      {% if app.user.setting.isDarkMode %}dark-mode{% endif %}
+      {% if app.user.setting.getFontSize %} {{ app.user.setting.getFontSize }}{% endif %}
+    {% endif %}
+  "
+>
+<div class="sidebar">
+    <!-- Twój sidebar -->
+    <a href="/mainPage">Dashboard</a>
+    <a href="/meetings">Meetings</a>
+    <a href="/friends">Friends</a>
+    <a href="/notifications">Notifications</a>
+    <a href="/recurring-events">Recurring Events</a>
+    <a href="/settings">Settings</a>
+    <a href="/logout" class="logout">Logout</a>
+</div>
+
+<div class="content">
+    {% block content %}
+
+    {% endblock %}
+</div>
+
+{% block javascripts %}
+{% endblock %}
+
+</body>
+</html>

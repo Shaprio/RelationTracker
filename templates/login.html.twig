@@ -1,112 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Log In | Sign Up</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2rem;
-            height: 100vh;
-            margin: 0;
-            background-color: #f9f9f9;
-        }
-        .left-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 50%;
-            text-align: center;
-        }
-        .logo {
-            width: 200px;
-            height: 150px;
-            background-color: #ccc;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-        }
-        .left-section h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        .signup-button {
-            background-color: #1E3A5F;
-            color: white;
-            text-decoration: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 4px;
-            font-size: 1rem;
-            margin-top: 1rem;
-        }
-        .signup-button:hover {
-            background-color: #3b5c87;
-        }
-        .right-section {
-            width: 40%;
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .right-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .login-button {
-            width: 100%;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .login-button:hover {
-            background-color: #0056b3;
-        }
-        .extra-links {
-            margin-top: 1rem;
-            text-align: center;
-        }
-        .extra-links a {
-            color: #007BFF;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        .extra-links a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-<div class="left-section">
-    <div class="logo">TEMP LOGO</div>
-    <h1>Log In | Sign Up</h1>
-    <a href="{{ path('register') }}" class="signup-button">Sign up</a>
-</div>
-<div class="right-section">
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}Log In{% endblock %}
+{% block heading %}Log In | Sign Up{% endblock %}
+{% block action_link_path %}{{ path('register') }}{% endblock %}
+{% block action_link_text %}Sign up{% endblock %}
+
+{% block content %}
     <h2>Log In</h2>
     <form action="{{ path('login') }}" method="POST">
         <div class="form-group">
@@ -123,6 +22,4 @@
         <a href="#">Forgot Password?</a><br>
         <a href="{{ path('register') }}">Don't Have an account? Signup Now.</a>
     </div>
-</div>
-</body>
-</html>
+{% endblock %}

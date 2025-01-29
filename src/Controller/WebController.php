@@ -19,6 +19,7 @@ use App\Entity\EventContact;
 use App\Entity\RecurringEvent;
 use App\Entity\RecurringEventContact;
 use App\Entity\Interaction;
+use App\Entity\Setting;
 
 
 
@@ -502,17 +503,82 @@ class WebController extends AbstractController
     }
 
 
-    #[Route('/settings', name: 'settings', methods: ['GET'])]
-    #[OA\Get(
-        path: '/settings',
-        summary: 'Render settings page',
-        responses: [
-            new OA\Response(response: 200, description: 'Settings page rendered')
-        ]
-    )]
-    public function settings(): Response
+    #[Route('/settings', name: 'app_settings', methods: ['GET'])]
+    public function settings(EntityManagerInterface $em): Response
     {
-        return $this->render('settings.html.twig');
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+
+        // Pobieramy Setting powiązany z user
+        // Załóżmy, że w user masz $user->getSetting().
+        // Jeśli jeszcze nie istnieje, tworzymy nowy:
+        $setting = $user->getSetting();
+        if (!$setting) {
+            $setting = new Setting();
+            $setting->setUser($user);
+            // ewentualnie domyślne preferencje
+            $em->persist($setting);
+            $em->flush();
+            $user->setSetting($setting);
+        }
+
+        return $this->render('settings.html.twig', [
+            'user' => $user,
+            'setting' => $setting,
+        ]);
+    }
+
+    #[Route('/settings/update', name: 'app_settings_update', methods: ['POST'])]
+    public function updateSettings(Request $request, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+
+        // Podstawowe dane użytkownika
+        $username = $request->request->get('username');
+        $email    = $request->request->get('email');
+        $password = $request->request->get('password');
+
+        $user->setName($username);
+        $user->setEmail($email);
+
+        if ($password) {
+            // tutaj ewentualnie hashowanie
+            // $hashedPassword = ...
+            // $user->setPassword($hashedPassword);
+        }
+
+        // Preferencje
+        /** @var Setting $setting */
+        $setting = $user->getSetting();
+        if (!$setting) {
+            // teoretycznie nie powinno się zdarzyć, bo tworzymy w GET, ale w razie W:
+            $setting = new Setting();
+            $setting->setUser($user);
+            $em->persist($setting);
+        }
+
+        // Checkbox 'notifications' (zwraca 'on' lub null)
+        $notifications = $request->request->get('notifications') === 'on';
+        $setting->setNotifications($notifications);
+
+        // Checkbox 'darkMode'
+        $darkMode = $request->request->get('darkMode') === 'on';
+        $setting->setDarkMode($darkMode);
+
+        // select 'fontSize' => 'small', 'medium', 'big'
+        $fontSize = $request->request->get('fontSize', 'medium');
+        $setting->setFontSize($fontSize);
+
+        $em->flush();
+
+        $this->addFlash('success', 'Settings updated successfully.');
+
+        return $this->redirectToRoute('app_settings');
     }
 
     #[Route('/recurring-events', name: 'recurring_events', methods: ['GET', 'POST'])]

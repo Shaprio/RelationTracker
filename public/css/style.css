@@ -1,0 +1,540 @@
+/* ========== RESET / BAZOWE STYLES ========== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    height: 100vh;
+    display: flex; /* najczęściej układ jest: sidebar (left) + content (right) */
+}
+
+h2, h3, p, h1 {
+    margin: 0;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+    width: 15%;
+    background-color: #1E3A5F;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #fff;
+    padding: 0.8rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+    gap: 0.5rem; /* jeżeli chcesz odstęp między ikoną a tekstem */
+}
+
+.sidebar a:hover {
+    background-color: #3b5c87;
+}
+
+.sidebar a.active {
+    background-color: #3b5c87;
+    font-weight: bold;
+}
+
+.sidebar .logout {
+    margin-top: auto;
+    background-color: #FF6666;
+    padding: 0.8rem 1rem;
+    text-align: center;
+    border-radius: 4px;
+}
+
+/* ========== CONTENT ========== */
+.content {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ========== HEADER / TOP BAR ========== */
+.header,
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    margin: 0;
+}
+
+.header button,
+.top-bar button,
+.create-event-btn {
+    padding: 0.6rem 1.2rem;
+    background-color: #1E3A5F;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.header button:hover,
+.top-bar button:hover,
+.create-event-btn:hover {
+    background-color: #3b5c87;
+}
+
+.welcome-box {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* ========== STATS (np. na mainPage) ========== */
+.stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.stat-box {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 1rem;
+    width: 7rem;
+    text-align: center;
+}
+
+.stat-box h2 {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+}
+
+.stat-box p {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* ========== MAIN SECTIONS LAYOUT (Left + Right) ========== */
+.main-sections {
+    display: flex;
+    gap: 2rem;
+    flex: 1;
+}
+
+.left-column {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.right-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ========== CARDS (np. na mainPage) ========== */
+.card {
+    background-color: #76B6F8;
+    color: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem; /* ewentualnie */
+}
+
+.card h3 {
+    margin-bottom: 0.5rem;
+}
+
+.card p {
+    margin-bottom: 0.3rem;
+}
+
+.item-list {
+    margin-top: 0.5rem;
+}
+
+.item-list .list-item {
+    background-color: rgba(255,255,255,0.2);
+    margin-bottom: 0.3rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+/* ========== CALENDAR + TODAY EVENTS (mainPage right) ========== */
+.calendar-box,
+.today-events {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.calendar-box h3 {
+    margin-bottom: 1rem;
+}
+
+.today-events {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.today-events h3 {
+    margin-bottom: 1rem;
+}
+
+.event-tile {
+    background-color: #76B6F8;
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+/* ========== FRIENDS PAGE ========== */
+.friend-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.friend-grid::-webkit-scrollbar {
+    width: 8px;
+}
+.friend-grid::-webkit-scrollbar-thumb {
+    background-color: #76B6F8;
+    border-radius: 4px;
+}
+.friend-grid::-webkit-scrollbar-thumb:hover {
+    background-color: #3b5c87;
+}
+
+.friend-item {
+    background-color: #76B6F8;
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.friend-item button {
+    padding: 0.5rem 1rem;
+    background-color: white;
+    color: #76B6F8;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.friend-item button:hover {
+    background-color: #fff;
+    color: #3b5c87;
+}
+
+/* ========== MODALS (common) ========== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 30%;
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modal-content button {
+    padding: 0.5rem 1rem;
+    background-color: #1E3A5F;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-content button:hover {
+    background-color: #3b5c87;
+}
+
+/* ========== LOGIN / REGISTER (left-section, right-section) ========== */
+.left-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    text-align: center;
+}
+.logo {
+    width: 200px;
+    height: 150px;
+    background-color: #ccc;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+.left-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+.signup-button,
+.login-button {
+    background-color: #1E3A5F;
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-top: 1rem;
+    border: none;
+    display: inline-block; /* link or button */
+}
+.signup-button:hover,
+.login-button:hover {
+    background-color: #3b5c87;
+}
+
+.right-section {
+    width: 40%;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.right-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+.form-group {
+    margin-bottom: 1rem;
+}
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.register-button {
+    width: 100%;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.register-button:hover {
+    background-color: #0056b3;
+}
+
+/* ========== NOTIFICATIONS PAGE ========== */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.notification-item {
+    background-color: #76B6F8;
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.notification-item p {
+    margin: 0;
+}
+.notification-item button {
+    padding: 0.5rem 1rem;
+    background-color: white;
+    color: #76B6F8;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.notification-item button:hover {
+    background-color: #fff;
+    color: #3b5c87;
+}
+
+/* ========== MEETINGS PAGE ========== */
+.meeting-list {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 150px);
+}
+.meeting-item {
+    background-color: #76B6F8;
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+    position: relative;
+}
+.meeting-item button {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    color: #76B6F8;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.meeting-item button:hover {
+    background-color: #fff;
+    color: #3b5c87;
+}
+.important-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 0.4rem 0.8rem;
+    background-color: #FFD700;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.important-btn.marked {
+    background-color: #FF4500;
+    color: white;
+}
+
+/* ========== RECURRING EVENTS PAGE ========== */
+.event-list {
+    overflow-y: auto;
+    max-height: calc(100vh - 150px);
+}
+.event-item {
+    background-color: #76B6F8;
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.event-item .details {
+    display: flex;
+    gap: 1rem;
+}
+.event-item button {
+    padding: 0.5rem 1rem;
+    background-color: white;
+    color: #76B6F8;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.event-item button:hover {
+    background-color: #fff;
+    color: #3b5c87;
+}
+.important-btn {
+    background-color: white;
+    color: #FFD700;
+}
+
+.dark-mode {
+    background-color: #333;
+    color: #ddd;
+}
+.dark-mode .sidebar {
+    background-color: #222;
+}
+.dark-mode .content {
+    /* cokolwiek chcesz: tło #444, linki jaśniejsze, itp. */
+}
+
+/* Font size */
+.small {
+    font-size: 14px;
+}
+.medium {
+    font-size: 16px;
+}
+.big {
+    font-size: 20px;
+}
