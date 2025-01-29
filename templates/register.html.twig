@@ -7,14 +7,24 @@
 
 {% block content %}
     <h2>Sign Up</h2>
+
+    {# Wyświetlanie flash messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     <form action="{{ path('register_submit') }}" method="POST">
         <div class="form-group">
             <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name" required value="{{ app.request.get('name') }}">
         </div>
         <div class="form-group">
             <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" required>
+            <input type="email" id="email" name="email" required value="{{ app.request.get('email') }}">
         </div>
         <div class="form-group">
             <label for="password">Password</label>

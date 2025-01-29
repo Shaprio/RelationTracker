@@ -1,33 +1,48 @@
 security:
-    # Haszowanie haseł
+    # Hashowanie haseł
     password_hashers:
         App\Entity\User:
             algorithm: auto
 
+    # Definicja dostawcy użytkowników
     providers:
         app_user_provider:
             entity:
                 class: App\Entity\User
                 property: email
 
+    # Konfiguracja firewalli
     firewalls:
-
+        # Firewall dla głównego interfejsu użytkownika
         main:
-          
             pattern: ^/
+            lazy: true
+            provider: app_user_provider
+
+            # Konfiguracja logowania formularzem
             form_login:
-                login_path: login          # adres, który wyświetla formularz (GET)
-                check_path: login          # ten sam adres obsługuje POST
-                default_target_path: /mainPage  # po zalogowaniu przekierowanie do /mainPage
+                login_path: login                      # Ścieżka do formularza logowania (GET)
+                check_path: login                      # Ścieżka do obsługi logowania (POST)
+                username_parameter: _username          # Nazwa pola nazwy użytkownika w formularzu
+                password_parameter: _password          # Nazwa pola hasła w formularzu
+                default_target_path: /mainPage         # Ścieżka po udanym logowaniu
+                always_use_default_target_path: false  # Używaj domyślnej ścieżki tylko wtedy, gdy nie ma innej docelowej ścieżki
+                
+            # Konfiguracja wylogowania
             logout:
-                path: logout    # pozwala wylogować się np. /logout
-        
+                path: logout          # Ścieżka do wylogowania użytkownika
+                target: login         # Ścieżka po wylogowaniu
+
+        # Firewall dla API z użyciem JWT
         api:
             pattern: ^/api
             stateless: true
             jwt: ~
 
+    # Kontrola dostępu do różnych ścieżek
     access_control:
        
+        # Ogranicz dostęp do API admina tylko dla roli ROLE_ADMIN
         - { path: ^/api/admin, roles: ROLE_ADMIN }
-        
+
+       

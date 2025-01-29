@@ -7,10 +7,18 @@
 
 {% block content %}
     <h2>Log In</h2>
+
+    {# Wyświetlanie błędów uwierzytelniania #}
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+    {% endif %}
+
     <form action="{{ path('login') }}" method="POST">
         <div class="form-group">
             <label for="email">Email Address</label>
-            <input type="email" id="email" name="_username" required>
+            <input type="email" id="email" name="_username" value="{{ last_username }}" required>
         </div>
         <div class="form-group">
             <label for="password">Password</label>

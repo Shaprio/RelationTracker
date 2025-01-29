@@ -82,7 +82,9 @@
 <body>
 <div class="auth-container">
     <div class="left-section">
-        <div class="logo">TEMP LOGO</div>
+        <div class="logo">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="logo-image">
+        </div>
         <h1>{% block heading %}Welcome{% endblock %}</h1>
         <a href="{% block action_link_path %}{{ path('register') }}{% endblock %}" class="signup-button">
             {% block action_link_text %}Sign up{% endblock %}
@@ -94,4 +96,5 @@
 </div>
 </body>
 </html>
+
 
