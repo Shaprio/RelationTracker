@@ -93,16 +93,6 @@
                 <p>(Placeholder for a calendar widget)</p>
             </div>
 
-            <!-- Dzisiejsze wydarzenia -->
-            <div class="today-events">
-                <h3>Today's Events</h3>
-                {% for ev in todayEvents %}
-                    <div class="event-tile">
-                        {{ ev.title }} — {{ ev.date|date('H:i') }}
-                    </div>
-                {% else %}
-                    <p>No events today.</p>
-                {% endfor %}
             </div>
         </div>
     </div>

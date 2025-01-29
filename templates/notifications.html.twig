@@ -19,11 +19,61 @@
                     <p><strong>Date:</strong> {{ event.date|date('Y-m-d') }}</p>
                     <p><strong>Description:</strong> {{ event.description }}</p>
                 </div>
-                <button onclick="alert('Details for {{ event.title }}')">View</button>
+                <button class="viewDetailsBtn" data-title="{{ event.title }}" data-type="{{ event.type }}"
+                        data-date="{{ event.date|date('Y-m-d') }}" data-description="{{ event.description }}">
+                    View
+                </button>
             </div>
         {% else %}
             <p>No important notifications found.</p>
         {% endfor %}
     </div>
+
+    <!-- Modal for Notification Details -->
+    <div class="modal" id="notificationModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Notification Details</h2>
+            <p><strong>Type:</strong> <span id="modalType"></span></p>
+            <p><strong>Title:</strong> <span id="modalEventTitle"></span></p>
+            <p><strong>Date:</strong> <span id="modalDate"></span></p>
+            <p><strong>Description:</strong> <span id="modalDescription"></span></p>
+            <button id="closeModal">Close</button>
+        </div>
+    </div>
 {% endblock %}
 
+{% block javascripts %}
+    <script>
+        const notificationModal = document.getElementById('notificationModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalType = document.getElementById('modalType');
+        const modalTitle = document.getElementById('modalEventTitle');
+        const modalDate = document.getElementById('modalDate');
+        const modalDescription = document.getElementById('modalDescription');
+
+        const viewDetailsBtns = document.querySelectorAll('.viewDetailsBtn');
+
+        viewDetailsBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modalType.textContent = btn.dataset.type;
+                modalTitle.textContent = btn.dataset.title;
+                modalDate.textContent = btn.dataset.date;
+                modalDescription.textContent = btn.dataset.description;
+
+                notificationModal.style.display = 'flex';
+            });
+        });
+
+        closeModal.addEventListener('click', () => {
+            notificationModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === notificationModal) {
+                notificationModal.style.display = 'none';
+            }
+        });
+    </script>
+
+
+{% endblock %}

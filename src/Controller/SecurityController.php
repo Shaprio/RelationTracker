@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,11 +12,202 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use OpenApi\Attributes as OA;
+
 
 class SecurityController extends AbstractController
 {
+    // **API Login**
+    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/login',
+        description: 'Logs in a user with email and password, returns JWT token.',
+        summary: 'User Login (API)',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['email', 'password'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
+                    new OA\Property(property: 'password', type: 'string', example: 'securepassword'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successfully logged in',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'token', type: 'string', example: 'JWT_TOKEN'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Invalid credentials',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Invalid credentials.'),
+                    ]
+                )
+            )
+        ]
+    )]
+    public function apiLogin(
+        Request $request,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $entityManager,
+        JWTTokenManagerInterface $JWTManager
+    ): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $email = $data['email'] ?? null;
+        $password = $data['password'] ?? null;
+
+        if (!$email || !$password) {
+            return $this->json(['error' => 'Email and password are required.'], 400);
+        }
+
+        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+        if (!$user || !$passwordHasher->isPasswordValid($user, $password)) {
+            return $this->json(['error' => 'Invalid credentials.'], 401);
+        }
+
+        // Generate JWT token
+        $token = $JWTManager->create($user);
+
+        return $this->json(['token' => $token]);
+    }
+
+    // **API Register**
+    #[Route('/api/register', name: 'api_register', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/register',
+        description: 'Registers a new user with name, email, and password.',
+        summary: 'User Registration (API)',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name', 'email', 'password'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Jan Kowalski'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'jan.kowalski@example.com'),
+                    new OA\Property(property: 'password', type: 'string', example: 'securepassword'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'User successfully registered',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string', example: 'Registration successful!')
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Validation error',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'array',
+                            items: new OA\Items(type: 'string', example: 'Email address is already registered.')
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    public function apiRegister(
+        Request $request,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator
+    ): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $email = $data['email'] ?? null;
+        $name = $data['name'] ?? null;
+        $password = $data['password'] ?? null;
+
+        if (!$email || !$name || !$password) {
+            return $this->json(['error' => 'Name, email, and password are required.'], 400);
+        }
+
+        $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+        if ($existingUser) {
+            return $this->json(['error' => 'Email address is already registered.'], 400);
+        }
+
+        $user = new User();
+        $user->setEmail($email);
+        $user->setName($name);
+        $user->setPassword($passwordHasher->hashPassword($user, $password));
+        $user->setRoles(['ROLE_USER']);
+
+        // Validate User entity
+        $errors = $validator->validate($user);
+
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['error' => $errorMessages], 400);
+        }
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $this->json(['message' => 'Registration successful!'], 201);
+    }
+
+    // **API Logout**
+    #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/logout',
+        description: 'Logs out the authenticated user by invalidating JWT token.',
+        summary: 'User Logout (API)',
+        security: [['Bearer' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Successfully logged out',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string', example: 'Logged out successfully.')
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthorized',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Unauthorized.')
+                    ]
+                )
+            )
+        ]
+    )]
+    public function apiLogout(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        // Implement token invalidation logic here (e.g., add token to blacklist)
+        // Currently, JWT is stateless and cannot be invalidated server-side without additional logic.
+
+        return $this->json(['message' => 'Logged out successfully.'], 200);
+    }
+
+    // **Web Login**
     #[Route('/login', name: 'login', methods: ['GET', 'POST'])]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function loginWeb(AuthenticationUtils $authenticationUtils): Response
     {
         // Pobierz ostatni błąd uwierzytelniania, jeśli istnieje
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -29,14 +221,15 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    // **Web Register**
     #[Route('/register', name: 'register', methods: ['GET'])]
-    public function register(): Response
+    public function registerWeb(): Response
     {
         return $this->render('register.html.twig');
     }
 
     #[Route('/register/submit', name: 'register_submit', methods: ['POST'])]
-    public function registerSubmit(
+    public function registerSubmitWeb(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $entityManager,
@@ -61,8 +254,6 @@ class SecurityController extends AbstractController
         $user->setEmail($email);
         $user->setName($name);
         $user->setPassword($passwordHasher->hashPassword($user, $password));
-
-        // Ustawienie roli użytkownika
         $user->setRoles(['ROLE_USER']);
 
         // Walidacja encji User
@@ -85,9 +276,11 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('login');
     }
 
+    // **Web Logout**
     #[Route('/logout', name: 'logout', methods: ['GET'])]
-    public function logout(): void
+    public function logoutWeb(): void
     {
-        throw new \Exception('This method will be intercepted by the firewall.');
+        // Ten kod nigdy nie zostanie wywołany, ponieważ wylogowanie jest przechwytywane przez firewall.
+        throw new \Exception('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 }

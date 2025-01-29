@@ -481,19 +481,21 @@ input {
 }
 
 /* ========== RECURRING EVENTS PAGE ========== */
+
 .event-list {
     overflow-y: auto;
     max-height: calc(100vh - 150px);
 }
 .event-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background-color: #76B6F8;
     color: white;
     padding: 1rem;
     border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 1rem;
+    width: 100%; /* Utrzymuje pełną szerokość */
 }
 .event-item .details {
     display: flex;
@@ -515,6 +517,11 @@ input {
 .important-btn {
     background-color: white;
     color: #FFD700;
+}
+
+.important-btn.marked {
+    background-color: #FF4500;
+    color: white;
 }
 
 .dark-mode {

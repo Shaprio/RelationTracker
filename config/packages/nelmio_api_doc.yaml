@@ -1,21 +1,104 @@
 nelmio_api_doc:
     documentation:
         info:
-            title: 'API Documentation'
-            description: 'API with JWT Authentication'
-            version: '1.0.0'
+            title: "Your API"
+            description: "API Documentation"
+            version: "1.0.0"
         components:
             securitySchemes:
                 Bearer:
                     type: http
                     scheme: bearer
-                    bearerFormat: JWT # Dodano dla większej czytelności
-        security:
-            - Bearer: [] # Domyślne zabezpieczenie dla wszystkich endpointów
-        servers:
-            - url: 'https://localhost' # URL serwera aplikacji
-
+                    bearerFormat: JWT
+            schemas:
+                Contact:
+                    type: object
+                    properties:
+                        id:
+                            type: integer
+                            example: 1
+                        name:
+                            type: string
+                            example: "Jan Kowalski"
+                        emailC:
+                            type: string
+                            format: email
+                            example: "jan.kowalski@example.com"
+                        phone:
+                            type: string
+                            example: "+48123456789"
+                        address:
+                            type: string
+                            example: "123 Main St"
+                        birthday:
+                            type: string
+                            format: date
+                            example: "1990-01-01"
+                        relationship:
+                            type: string
+                            example: "Friend"
+                        note:
+                            type: string
+                            example: "Met at school"
+                Event:
+                    type: object
+                    properties:
+                        id:
+                            type: integer
+                            example: 1
+                        title:
+                            type: string
+                            example: "Project Meeting"
+                        description:
+                            type: string
+                            example: "Discussing project progress"
+                        date:
+                            type: string
+                            format: date-time
+                            example: "2024-02-15T14:00:00Z"
+                        createdAt:
+                            type: string
+                            format: date-time
+                            example: "2024-02-10T10:00:00Z"
+                        updatedAt:
+                            type: string
+                            format: date-time
+                            example: "2024-02-14T12:00:00Z"
+                        contacts:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/Contact"
+                RecurringEvent:
+                    type: object
+                    properties:
+                        id:
+                            type: integer
+                            example: 1
+                        title:
+                            type: string
+                            example: "Weekly Team Meeting"
+                        description:
+                            type: string
+                            example: "A weekly team status update"
+                        recurrencePattern:
+                            type: string
+                            example: "Weekly"
+                        startDate:
+                            type: string
+                            format: date
+                            example: "2024-03-01"
+                        endDate:
+                            type: string
+                            format: date
+                            nullable: true
+                            example: "2024-12-31"
+                        isImportant:
+                            type: boolean
+                            example: false
+                        contacts:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/Contact"                
     areas:
-        default:
-            path_patterns: ['^/'] # Obsługuj wszystkie ścieżki
-
+        path_patterns:
+            - ^/api
