@@ -1,4 +1,3 @@
-{# templates/meetings.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}
@@ -14,22 +13,26 @@
     <div class="meeting-list">
         {% for event in events %}
             <div class="meeting-item">
-                <p>Title: {{ event.title }}</p>
-                <p>Description: {{ event.description }}</p>
-                <p>Date: {{ event.date|date('Y-m-d') }}</p>
-                <p>Contacts:
-                    {% for contact in event.contact %}
-                        {{ contact.contact.name }}{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                </p>
-                <button class="editEventBtn" data-id="{{ event.id }}">Edit</button>
-                <button
-                    class="important-btn {{ event.isImportant ? 'marked' : '' }}"
-                    data-id="{{ event.id }}"
-                    data-type="meeting"
-                >
-                    {{ event.isImportant ? 'Unmark Important' : 'Mark as Important' }}
-                </button>
+                <div class="meeting-details">
+                    <h3>{{ event.title }}</h3>
+                    <p><strong>Description:</strong> {{ event.description }}</p>
+                    <p><strong>Date:</strong> {{ event.date|date('Y-m-d H:i') }}</p>
+                    <p><strong>Contacts:</strong>
+                        {% for contact in event.contact %}
+                            {{ contact.contact.name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="meeting-actions">
+                    <button class="editEventBtn" data-id="{{ event.id }}">Edit</button>
+                    <button
+                        class="important-btn {{ event.isImportant ? 'marked' : '' }}"
+                        data-id="{{ event.id }}"
+                        data-type="meeting">
+                        {{ event.isImportant ? 'Unmark Important' : 'Mark as Important' }}
+                    </button>
+                    <button class="deleteEventBtn" data-id="{{ event.id }}">Delete</button>
+                </div>
             </div>
         {% else %}
             <p>No meetings available.</p>
@@ -39,14 +42,11 @@
     <!-- Modal -->
     <div class="modal" id="eventModal">
         <div class="modal-content">
-            <!-- Zamykamy modal przyciskiem? Zdefiniuj go, jeśli chcesz -->
-            <!-- <button id="closeModal">Close</button> -->
-
             <form method="POST" action="/meetings">
                 <input type="hidden" name="event_id" id="eventId">
                 <input type="text" name="title" id="eventTitle" placeholder="Title" required>
                 <textarea name="description" id="eventDescription" placeholder="Description"></textarea>
-                <input type="date" name="date" id="eventDate" required>
+                <input type="datetime-local" name="date" id="eventDate" required>
                 <label>Contacts:</label>
                 <select name="contacts[]" id="eventContacts" multiple>
                     {% for contact in contacts %}
@@ -66,6 +66,7 @@
         const addEventBtn = document.getElementById('addEventBtn');
         const editEventBtns = document.querySelectorAll('.editEventBtn');
         const importantBtns = document.querySelectorAll('.important-btn');
+        const deleteEventBtns = document.querySelectorAll('.deleteEventBtn');
 
         // Open Add Event Modal
         if (addEventBtn) {
@@ -77,21 +78,10 @@
                     document.getElementById('eventDescription').value = '';
                     document.getElementById('eventDate').value = '';
 
-                    // Odczytaj #eventContacts i wyczyść zaznaczenia
                     const eventContacts = document.getElementById('eventContacts');
                     Array.from(eventContacts.options).forEach(option => {
                         option.selected = false;
                     });
-                }
-            });
-        }
-
-        // (Optional) If you have a "closeModal" button inside the form
-        const closeModal = document.getElementById('closeModal');
-        if (closeModal) {
-            closeModal.addEventListener('click', () => {
-                if (modal) {
-                    modal.style.display = 'none';
                 }
             });
         }
@@ -103,17 +93,12 @@
                     modal.style.display = 'flex';
                     const parent = btn.closest('.meeting-item');
 
-                    // Populate the modal fields
-                    document.getElementById('eventId').value =
-                        btn.getAttribute('data-id') || '';
-                    document.getElementById('eventTitle').value =
-                        parent.querySelector('p:nth-of-type(1)').textContent.split(': ')[1] || '';
+                    document.getElementById('eventId').value = btn.getAttribute('data-id') || '';
+                    document.getElementById('eventTitle').value = parent.querySelector('h3').textContent || '';
                     document.getElementById('eventDescription').value =
-                        parent.querySelector('p:nth-of-type(2)').textContent.split(': ')[1] || '';
+                        parent.querySelector('p:nth-of-type(1)').textContent.split(': ')[1] || '';
                     document.getElementById('eventDate').value =
-                        parent.querySelector('p:nth-of-type(3)').textContent.split(': ')[1] || '';
-
-                    // #eventContacts - bez detali, bo np. nie mamy przypisanych kontaktów w HTML p
+                        parent.querySelector('p:nth-of-type(2)').textContent.split(': ')[1] || '';
                 }
             });
         });
@@ -122,16 +107,9 @@
         importantBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const eventId = btn.getAttribute('data-id');
-                const eventType = btn.getAttribute('data-type'); // "meeting" or "recurring"
                 const isImportant = btn.classList.contains('marked');
 
-                // Determine the correct API endpoint based on type
-                const url = (eventType === 'meeting')
-                    ? `/meetings/${eventId}/important`
-                    : `/recurring-events/${eventId}/important`;
-
-                // Send POST request to toggle importance
-                fetch(url, {
+                fetch(`/meetings/${eventId}/important`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ important: !isImportant })
@@ -150,6 +128,28 @@
                         }
                     })
                     .catch(error => console.error('Error:', error));
+            });
+        });
+
+        // Delete Event
+        deleteEventBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const eventId = btn.getAttribute('data-id');
+                if (confirm('Are you sure you want to delete this meeting?')) {
+                    fetch(`/meetings/${eventId}/delete`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Failed to delete event');
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                btn.closest('.meeting-item').remove();
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
             });
         });
 

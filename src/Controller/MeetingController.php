@@ -24,7 +24,6 @@ class MeetingController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        // Pobieranie wydarzeń użytkownika
         $events = $entityManager->getRepository(Event::class)->findBy(['userE' => $user]);
         $contacts = $entityManager->getRepository(Contact::class)->findBy(['userName' => $user]);
 
@@ -32,23 +31,27 @@ class MeetingController extends AbstractController
             $eventId = $request->request->get('event_id');
             $title = $request->request->get('title');
             $description = $request->request->get('description');
-            $date = $request->request->get('date');
+            $dateTime = $request->request->get('date'); // Obsługa różnych formatów daty
             $selectedContacts = $request->request->all('contacts') ?? [];
 
+            // Wywołanie metody parseDate(), aby obsłużyć różne formaty daty
+            $dateObject = $this->parseDate($dateTime);
+            if (!$dateObject) {
+                return new JsonResponse(['error' => "Invalid date format. Received: '$dateTime'"], Response::HTTP_BAD_REQUEST);
+            }
+
             if ($eventId) {
-                // Edycja istniejącego wydarzenia
                 $event = $entityManager->getRepository(Event::class)->find($eventId);
                 if ($event && $event->getUserE() === $user) {
-                    $event->setTitle($title);
-                    $event->setDescription($description);
-                    $event->setDate(new \DateTime($date));
-                    $event->setUpdateAt(new \DateTime());
+                    $event->setTitle($title)
+                        ->setDescription($description)
+                        ->setDate($dateObject)
+                        ->setUpdateAt(new \DateTime());
 
-                    // Usuwamy poprzednie przypisania (EventContact)
                     foreach ($event->getContact() as $eventContact) {
                         $entityManager->remove($eventContact);
                     }
-                    // Dodajemy nowe
+
                     foreach ($selectedContacts as $contactId) {
                         $contact = $entityManager->getRepository(Contact::class)->find($contactId);
                         if ($contact) {
@@ -61,14 +64,13 @@ class MeetingController extends AbstractController
                     $entityManager->flush();
                 }
             } else {
-                // Dodawanie nowego wydarzenia
                 $event = new Event();
-                $event->setUserE($user);
-                $event->setTitle($title);
-                $event->setDescription($description);
-                $event->setDate(new \DateTime($date));
-                $event->setCreatedAt(new \DateTimeImmutable());
-                $event->setUpdateAt(new \DateTime());
+                $event->setUserE($user)
+                    ->setTitle($title)
+                    ->setDescription($description)
+                    ->setDate($dateObject)
+                    ->setCreatedAt(new \DateTimeImmutable())
+                    ->setUpdateAt(new \DateTime());
 
                 $entityManager->persist($event);
 
@@ -92,6 +94,32 @@ class MeetingController extends AbstractController
             'contacts' => $contacts,
         ]);
     }
+    private function parseDate(?string $dateString): ?\DateTime
+    {
+        if (!$dateString) {
+            return null;
+        }
+
+        // Obsługa formatu "Y-m-d H:i:s"
+        $dateObject = \DateTime::createFromFormat('Y-m-d H:i:s', $dateString);
+        if ($dateObject) {
+            return $dateObject;
+        }
+
+        // Obsługa formatu ISO 8601 "Y-m-d\TH:i"
+        $dateObject = \DateTime::createFromFormat('Y-m-d\TH:i', $dateString);
+        if ($dateObject) {
+            return $dateObject;
+        }
+
+        // Obsługa standardowego formatu PHP DateTime
+        try {
+            return new \DateTime($dateString);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     #[Route('/meetings/{id}/important', name: 'meeting_toggle_important', methods: ['POST'])]
     public function toggleMeetingImportant(Event $event, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -99,6 +127,20 @@ class MeetingController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['success' => true, 'isImportant' => $event->getIsImportant()]);
+    }
+
+    #[Route('/meetings/{id}/delete', name: 'meeting_delete', methods: ['DELETE'])]
+    public function deleteMeeting(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $event = $entityManager->getRepository(Event::class)->find($id);
+        if (!$event) {
+            return new JsonResponse(['error' => 'Meeting not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $entityManager->remove($event);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true, 'message' => 'Meeting deleted successfully.']);
     }
 
 

@@ -5,22 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="beecf254-77b6-4a86-88f2-8117916fe693" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/109c5bb0-19f3-4d9f-825f-32cef2c93795.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/109c5bb0-19f3-4d9f-825f-32cef2c93795.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/109c5bb0-19f3-4d9f-825f-32cef2c93795/storage_v2/_src_/database/app.IXoBAA/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/109c5bb0-19f3-4d9f-825f-32cef2c93795/storage_v2/_src_/database/app.IXoBAA/schema/public.abK9xQ.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" afterPath="$PROJECT_DIR$/composer.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/packages/lexik_jwt_authentication.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/packages/lexik_jwt_authentication.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/packages/nelmio_api_doc.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/packages/nelmio_api_doc.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/ContactController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/ContactController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/MeetingController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/MeetingController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/RecurringEventController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/RecurringEventController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/SecurityController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/SecurityController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/SettingsController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/SettingsController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/StatisticsController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/StatisticsController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/mainPage.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/mainPage.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/notifications.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/notifications.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/installed.json" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/composer/installed.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/installed.php" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/composer/installed.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entity/Event.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Event.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/meetings.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/meetings.html.twig" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,7 +146,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Fix",
     "node.js.selected.package.tslint": "(autodetect)"
   }
 }]]></component>

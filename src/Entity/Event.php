@@ -26,33 +26,30 @@ class Event
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeInterface $updateAt = null;
 
-    /**
-     * @var Collection<int, EventContact>
-     */
-    #[ORM\OneToMany(targetEntity: EventContact::class, mappedBy: 'event')]
+    #[ORM\OneToMany(targetEntity: EventContact::class, mappedBy: 'event', cascade: ['persist', 'remove'])]
     private Collection $contact;
 
-    /**
-     * @var Collection<int, Reminder>
-     */
-    #[ORM\OneToMany(targetEntity: Reminder::class, mappedBy: 'eventR')]
+    #[ORM\OneToMany(targetEntity: Reminder::class, mappedBy: 'eventR', cascade: ['persist', 'remove'])]
     private Collection $reminders;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isImportant = false;
+
     public function __construct()
     {
         $this->contact = new ArrayCollection();
         $this->reminders = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable(); // Automatycznie ustawiana data utworzenia
+        $this->updateAt = new \DateTime(); // Automatycznie ustawiana data aktualizacji
     }
 
     public function getId(): ?int
@@ -68,7 +65,6 @@ class Event
     public function setUserE(?User $userE): static
     {
         $this->userE = $userE;
-
         return $this;
     }
 
@@ -80,7 +76,6 @@ class Event
     public function setTitle(string $title): static
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -92,7 +87,6 @@ class Event
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -101,9 +95,17 @@ class Event
         return $this->date;
     }
 
-    public function setDate(\DateTimeInterface $date): static
+    public function setDate(\DateTimeInterface|string $date): static
     {
-        $this->date = $date;
+        if (is_string($date)) {
+            $dateObject = \DateTime::createFromFormat('Y-m-d H:i:s', $date);
+            if (!$dateObject) {
+                throw new \InvalidArgumentException("Invalid date format, expected 'Y-m-d H:i:s'.");
+            }
+            $this->date = $dateObject;
+        } else {
+            $this->date = $date;
+        }
 
         return $this;
     }
@@ -116,7 +118,6 @@ class Event
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -128,13 +129,9 @@ class Event
     public function setUpdateAt(\DateTimeInterface $updateAt): static
     {
         $this->updateAt = $updateAt;
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, EventContact>
-     */
     public function getContact(): Collection
     {
         return $this->contact;
@@ -153,7 +150,6 @@ class Event
     public function removeContact(EventContact $contact): static
     {
         if ($this->contact->removeElement($contact)) {
-            // set the owning side to null (unless already changed)
             if ($contact->getEvent() === $this) {
                 $contact->setEvent(null);
             }
@@ -162,9 +158,6 @@ class Event
         return $this;
     }
 
-    /**
-     * @return Collection<int, Reminder>
-     */
     public function getReminders(): Collection
     {
         return $this->reminders;
@@ -183,7 +176,6 @@ class Event
     public function removeReminder(Reminder $reminder): static
     {
         if ($this->reminders->removeElement($reminder)) {
-            // set the owning side to null (unless already changed)
             if ($reminder->getEventR() === $this) {
                 $reminder->setEventR(null);
             }
@@ -200,7 +192,6 @@ class Event
     public function setIsImportant(bool $isImportant): self
     {
         $this->isImportant = $isImportant;
-
         return $this;
     }
 }
