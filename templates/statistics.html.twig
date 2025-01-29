@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistics{% endblock %}
+
+{% block content %}
+    <div class="header">
+        <h1>Statistics</h1>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-box">
+            <h2>{{ contactCount }}</h2>
+            <p>Total Contacts</p>
+        </div>
+        <div class="stat-box">
+            <h2>{{ eventCount }}</h2>
+            <p>Total Events</p>
+        </div>
+        <div class="stat-box">
+            <h2>{{ recurringEventCount }}</h2>
+            <p>Total Recurring Events</p>
+        </div>
+        <div class="stat-box">
+            <h2>{{ interactionCount }}</h2>
+            <p>Total Interactions</p>
+        </div>
+    </div>
+
+    <div class="top-section">
+        <div class="top-list">
+            <h3>Top 5 Contacts (Most Interactions)</h3>
+            <ul>
+                {% for contact in topContacts %}
+                    <li>{{ contact.name }} - {{ contact.interaction_count }} interactions</li>
+                {% else %}
+                    <li>No interactions yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="top-list">
+            <h3>Top 5 Contacts You Initiate Interactions With</h3>
+            <ul>
+                {% for contact in initiatedByUser %}
+                    <li>{{ contact.name }} - {{ contact.count }} interactions</li>
+                {% else %}
+                    <li>No interactions initiated by you.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="top-list">
+            <h3>Top 5 Contacts That Initiate Interactions With You</h3>
+            <ul>
+                {% for contact in initiatedByContact %}
+                    <li>{{ contact.name }} - {{ contact.count }} interactions</li>
+                {% else %}
+                    <li>No interactions initiated by others.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}
