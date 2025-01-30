@@ -1,4 +1,3 @@
-{# templates/mainPage.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}
@@ -22,40 +21,75 @@
     <div class="main-sections">
         <div class="left-column">
             <div class="card">
-                <h3>Events This Week</h3>
-                <div class="item-list">
-                    {% for e in eventsThisWeek %}
-                        <div class="list-item">{{ e.title }} — {{ e.date|date('Y-m-d H:i') }}</div>
-                    {% else %}
-                        <p>No events found for this week.</p>
-                    {% endfor %}
+                <h3>Upcoming Events (Next 7 Days)</h3>
+                <div class="scrollbox">
+                    <div class="item-list">
+                        {% for e in upcomingEvents[:10] %}
+                            <div class="list-item">
+                                <strong>{{ e.title }}</strong> — {{ e.date|date('Y-m-d H:i') }}
+                                {% if e.type == 'Recurring' %}
+                                    <span class="badge bg-primary">Recurring</span>
+                                {% else %}
+                                    <span class="badge bg-success">Meeting</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p>No upcoming events.</p>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
+
             <div class="card">
                 <h3>Birthday Events This Month</h3>
-                <div class="item-list">
-                    {% for b in birthdayEvents %}
-                        <div class="list-item">{{ b.title }} on {{ b.startDate|date('Y-m-d') }}</div>
-                    {% else %}
-                        <p>No birthdays this month.</p>
-                    {% endfor %}
+                <div class="scrollbox">
+                    <div class="item-list">
+                        {% for b in birthdayEvents[:5] %}
+                            <div class="list-item">{{ b.title }} on {{ b.startDate|date('Y-m-d') }}</div>
+                        {% else %}
+                            <p>No birthdays this month.</p>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
+
             <div class="card">
                 <h3>Contacts to Reconnect</h3>
-                <div class="item-list">
-                    {% for c in staleContacts %}
-                        <div class="list-item">{{ c.name }} - Last interaction over a month ago</div>
-                    {% else %}
-                        <p>All contacts are up to date.</p>
-                    {% endfor %}
+                <div class="scrollbox">
+                    <div class="item-list">
+                        {% for c in staleContacts[:5] %}
+                            <div class="list-item">{{ c.name }} - Last interaction over a month ago</div>
+                        {% else %}
+                            <p>All contacts are up to date.</p>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
         <div class="right-column">
             <div class="calendar-box">
                 <h3>Calendar</h3>
-                <div id="calendar"></div>
+                <div id="calendar" class="calendar-container"></div>
+            </div>
+
+            <div class="card">
+                <h3>Today's Events</h3>
+                <div class="scrollbox tall">
+                    <div id="today-events-list" class="item-list">
+                        {% for event in todayEvents %}
+                            <div class="list-item">
+                                <strong>{{ event.title }}</strong> — {{ event.date }}
+                                {% if event.type == 'Recurring' %}
+                                    <span class="badge bg-primary">Recurring</span>
+                                {% else %}
+                                    <span class="badge bg-success">Meeting</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p>No events today.</p>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -73,17 +107,43 @@
 
             let calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                themeSystem: 'bootstrap5', // Dla Bootstrap 5
+                themeSystem: 'bootstrap5',
+                height: 300, // 🔽 Zmniejszenie wysokości kalendarza
                 headerToolbar: {
-                    left: '',
+                    left: 'prev,next today',
                     center: 'title',
-                    right: ''
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-
+                dateClick: function(info) {
+                    updateTodayEvents(info.dateStr);
+                }
             });
 
             calendar.render();
-        });
 
+            function updateTodayEvents(date) {
+                fetch(`/api/today-events?date=${date}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let eventList = document.querySelector('#today-events-list');
+                        eventList.innerHTML = '';
+                        if (data.length > 0) {
+                            data.forEach(event => {
+                                let item = document.createElement('div');
+                                item.className = 'list-item';
+                                item.innerHTML = `<strong>${event.title}</strong> — ${event.date}
+                                <span class="badge ${event.type === 'Recurring' ? 'bg-primary' : 'bg-success'}">
+                                    ${event.type}
+                                </span>`;
+                                eventList.appendChild(item);
+                            });
+                        } else {
+                            eventList.innerHTML = '<p>No events found for this date.</p>';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching events:', error));
+            }
+        });
     </script>
+
 {% endblock %}

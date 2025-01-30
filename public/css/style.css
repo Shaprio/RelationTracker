@@ -179,6 +179,13 @@ h2, h3, p, h1 {
     padding: 0.5rem;
     border-radius: 4px;
 }
+.scrollbox {
+    max-height: 250px; /* Ustalona wysokość, aby uniknąć zbyt długich list */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
 
 /* ========== CALENDAR + TODAY EVENTS (mainPage right) ========== */
 .calendar-box,

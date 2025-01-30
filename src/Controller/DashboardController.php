@@ -5,11 +5,15 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\User;
 use App\Entity\Event;
 use App\Entity\RecurringEvent;
 use App\Entity\Contact;
+use App\Entity\User;
+use DateTime;
+use Exception;
 
 class DashboardController extends AbstractController
 {
@@ -21,43 +25,82 @@ class DashboardController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        // 1. Meetingi (Event) w tym tygodniu
-        $eventsThisWeek = $entityManager
-            ->getRepository(Event::class)
-            ->findThisWeekForUser($user);
+        // 🗓 Pobranie wydarzeń na nadchodzące 7 dni (od dzisiaj)
+        $startDate = new \DateTime();
+        $endDate = (new \DateTime())->modify('+7 days');
 
-        // 2. Recurring events w tym tygodniu
-        $recurringThisWeek = $entityManager
-            ->getRepository(RecurringEvent::class)
-            ->findThisWeekForUser($user);
+        $upcomingMeetings = $entityManager->getRepository(Event::class)->findUpcomingForUser($user, $startDate, $endDate);
+        $upcomingRecurring = $entityManager->getRepository(RecurringEvent::class)->findRecurringInNextDays($user, 7);
 
-        // 3. Recurring events o tytule „Birthday” w tym miesiącu
-        $birthdayEvents = $entityManager
-            ->getRepository(RecurringEvent::class)
-            ->findBirthdaysThisMonth($user);
+        // 🔄 Formatowanie wydarzeń
+        $upcomingEvents = array_merge(
+            array_map(fn(Event $event) => [
+                'title' => $event->getTitle(),
+                'date' => $event->getDate()->format('Y-m-d H:i'),
+                'type' => 'Meeting'
+            ], $upcomingMeetings),
+            $upcomingRecurring // TERAZ używam już sformatowanej listy z `findRecurringInNextDays`
+        );
 
-        // 4. Kontakty, z którymi nie było interakcji ponad miesiąc
-        $staleContacts = $entityManager
-            ->getRepository(Contact::class)
-            ->findStaleContacts($user);
+        // 📅 Pobranie wydarzeń na dzisiejszy dzień
+        $today = new \DateTime();
+        $todayMeetings = $entityManager->getRepository(Event::class)->findByDateForUser($user, $today);
+        $todayRecurring = $entityManager->getRepository(RecurringEvent::class)->getRecurringEventsOnDate($user, $today);
 
-        // 5. Dzisiejsze wydarzenia (Meetings + RecurringEvents)
-        $todayEventsMeetings = $entityManager
-            ->getRepository(Event::class)
-            ->findTodayForUser($user);
+        // 🔁 Konwersja `todayEvents` z `type`
+        $todayEvents = array_merge(
+            array_map(fn(Event $event) => [
+                'title' => $event->getTitle(),
+                'date' => $event->getDate()->format('Y-m-d H:i'),
+                'type' => 'Meeting'
+            ], $todayMeetings),
+            $todayRecurring // TERAZ używam `getRecurringEventsOnDate()`, które zwraca poprawne daty
+        );
 
-        $todayEventsRecurring = $entityManager
-            ->getRepository(RecurringEvent::class)
-            ->findTodayForUser($user);
+        // 🎂 Pobranie urodzin w tym miesiącu
+        $birthdayEvents = $entityManager->getRepository(RecurringEvent::class)->findBirthdaysThisMonthForUser($user);
 
-        $todayEvents = array_merge($todayEventsMeetings, $todayEventsRecurring);
+        // 🔄 Pobranie kontaktów do ponownego kontaktu
+        $staleContacts = $entityManager->getRepository(Contact::class)->findStaleContacts($user);
 
         return $this->render('mainPage.html.twig', [
-            'eventsThisWeek'    => $eventsThisWeek,
-            'recurringThisWeek' => $recurringThisWeek,
-            'birthdayEvents'    => $birthdayEvents,
-            'staleContacts'     => $staleContacts,
-            'todayEvents'       => $todayEvents,
+            'upcomingEvents'  => $upcomingEvents,
+            'todayEvents'     => $todayEvents,
+            'birthdayEvents'  => $birthdayEvents,
+            'staleContacts'   => $staleContacts,
         ]);
     }
+
+    #[Route('/api/today-events', name: 'api_today_events', methods: ['GET'])]
+    public function getTodayEvents(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Pobranie wybranej daty (lub dzisiejszej, jeśli brak)
+        $dateString = $request->query->get('date', (new \DateTime())->format('Y-m-d'));
+        $date = \DateTime::createFromFormat('Y-m-d', $dateString);
+        if (!$date) {
+            return $this->json(['error' => 'Invalid date format'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Pobranie wydarzeń dla tej daty
+        $todayMeetings = $entityManager->getRepository(Event::class)->findByDateForUser($user, $date);
+        $todayRecurring = $entityManager->getRepository(RecurringEvent::class)->getRecurringEventsOnDate($user, $date);
+
+        // Łączenie i formatowanie danych
+        $todayEvents = array_merge(
+            array_map(fn($event) => [
+                'title' => $event->getTitle(),
+                'date' => $event->getDate()->format('Y-m-d H:i'),
+                'type' => 'Meeting'
+            ], $todayMeetings),
+            $todayRecurring
+        );
+
+        return $this->json($todayEvents);
+    }
+
 }

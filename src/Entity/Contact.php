@@ -18,7 +18,7 @@ class Contact
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'contacts')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?User $userName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -54,13 +54,13 @@ class Contact
     /**
      * @var Collection<int, EventContact>
      */
-    #[ORM\OneToMany(mappedBy: 'contact', targetEntity: EventContact::class)]
+    #[ORM\OneToMany(mappedBy: 'contact', targetEntity: EventContact::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $eventC;
 
     /**
      * @var Collection<int, Reminder>
      */
-    #[ORM\OneToMany(mappedBy: 'contactR', targetEntity: Reminder::class)]
+    #[ORM\OneToMany(mappedBy: 'contactR', targetEntity: Reminder::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $reminders;
 
     /**
@@ -71,6 +71,7 @@ class Contact
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?DateTimeInterface $lastInteraction = null;
+
     public function __construct()
     {
         $this->eventC = new ArrayCollection();
@@ -178,12 +179,6 @@ class Contact
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
-
     public function getUpdateAt(): ?\DateTimeInterface
     {
         return $this->updateAt;
@@ -214,25 +209,6 @@ class Contact
         return $this->eventC;
     }
 
-    public function addEventC(EventContact $eventC): static
-    {
-        if (!$this->eventC->contains($eventC)) {
-            $this->eventC->add($eventC);
-            $eventC->setContact($this);
-        }
-        return $this;
-    }
-
-    public function removeEventC(EventContact $eventC): static
-    {
-        if ($this->eventC->removeElement($eventC)) {
-            if ($eventC->getContact() === $this) {
-                $eventC->setContact(null);
-            }
-        }
-        return $this;
-    }
-
     /**
      * @return Collection<int, Reminder>
      */
@@ -241,50 +217,12 @@ class Contact
         return $this->reminders;
     }
 
-    public function addReminder(Reminder $reminder): static
-    {
-        if (!$this->reminders->contains($reminder)) {
-            $this->reminders->add($reminder);
-            $reminder->setContactR($this);
-        }
-        return $this;
-    }
-
-    public function removeReminder(Reminder $reminder): static
-    {
-        if ($this->reminders->removeElement($reminder)) {
-            if ($reminder->getContactR() === $this) {
-                $reminder->setContactR(null);
-            }
-        }
-        return $this;
-    }
-
     /**
      * @return Collection<int, Interaction>
      */
     public function getInteractions(): Collection
     {
         return $this->interactions;
-    }
-
-    public function addInteraction(Interaction $interaction): static
-    {
-        if (!$this->interactions->contains($interaction)) {
-            $this->interactions->add($interaction);
-            $interaction->setContact($this);
-        }
-        return $this;
-    }
-
-    public function removeInteraction(Interaction $interaction): static
-    {
-        if ($this->interactions->removeElement($interaction)) {
-            if ($interaction->getContact() === $this) {
-                $interaction->setContact(null);
-            }
-        }
-        return $this;
     }
 
     public function getLastInteraction(): ?DateTimeInterface
@@ -297,7 +235,4 @@ class Contact
         $this->lastInteraction = $lastInteraction;
         return $this;
     }
-
 }
-
-

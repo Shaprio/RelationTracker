@@ -14,35 +14,30 @@ class EventRepository extends ServiceEntityRepository
         parent::__construct($registry, Event::class);
     }
 
-    public function findThisWeekForUser(User $user): array
+    public function findUpcomingForUser(User $user, \DateTime $fromDate, \DateTime $toDate): array
     {
-        $startOfWeek = (new \DateTime('monday this week'))->setTime(0, 0);
-        $endOfWeek   = (new \DateTime('sunday this week'))->setTime(23, 59);
-
         return $this->createQueryBuilder('e')
-            ->andWhere('e.userE = :user')    // <--- kluczowe: userE
-            ->andWhere('e.date BETWEEN :start AND :end')
+            ->andWhere('e.userE = :user')
+            ->andWhere('e.date BETWEEN :fromDate AND :toDate')
             ->setParameter('user', $user)
-            ->setParameter('start', $startOfWeek)
-            ->setParameter('end', $endOfWeek)
+            ->setParameter('fromDate', $fromDate->format('Y-m-d 00:00:00'))
+            ->setParameter('toDate', $toDate->format('Y-m-d 23:59:59'))
             ->orderBy('e.date', 'ASC')
             ->getQuery()
             ->getResult();
     }
-    public function findTodayForUser(User $user): array
-    {
-        $todayStart = (new \DateTime())->setTime(0, 0);
-        $todayEnd   = (new \DateTime())->setTime(23, 59);
 
+    public function findByDateForUser(User $user, \DateTimeInterface $date): array
+    {
         return $this->createQueryBuilder('e')
-            ->andWhere('e.userE = :user')  // <-- POPRAWKA
-            ->andWhere('e.date BETWEEN :start AND :end')
+            ->andWhere('e.userE = :user')
+            ->andWhere('e.date >= :selectedDateStart')
+            ->andWhere('e.date < :selectedDateEnd')
             ->setParameter('user', $user)
-            ->setParameter('start', $todayStart)
-            ->setParameter('end', $todayEnd)
+            ->setParameter('selectedDateStart', $date->format('Y-m-d 00:00:00'))
+            ->setParameter('selectedDateEnd', $date->format('Y-m-d 23:59:59'))
             ->orderBy('e.date', 'ASC')
             ->getQuery()
             ->getResult();
     }
 }
-
