@@ -18,8 +18,9 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
         'ffecb95d45175fd40f75be8a23b34f90' => __DIR__ . '/..' . '/twig/twig/src/Resources/debug.php',
         'c7baa00073ee9c61edf148c51917cfb4' => __DIR__ . '/..' . '/twig/twig/src/Resources/escaper.php',
         'f844ccf1d25df8663951193c3fc307c8' => __DIR__ . '/..' . '/twig/twig/src/Resources/string_loader.php',
-        'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '2203a247e6fda86070a5e4e07aed533a' => __DIR__ . '/..' . '/symfony/clock/Resources/now.php',
+        'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
+        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -55,6 +56,7 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
             'Symfony\\Component\\TypeInfo\\' => 27,
             'Symfony\\Component\\String\\' => 25,
             'Symfony\\Component\\Stopwatch\\' => 28,
+            'Symfony\\Component\\Serializer\\' => 29,
             'Symfony\\Component\\Security\\Http\\' => 32,
             'Symfony\\Component\\Security\\Csrf\\' => 32,
             'Symfony\\Component\\Security\\Core\\' => 32,
@@ -66,6 +68,8 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
             'Symfony\\Component\\PasswordHasher\\' => 33,
             'Symfony\\Component\\OptionsResolver\\' => 34,
             'Symfony\\Component\\Mime\\' => 23,
+            'Symfony\\Component\\Messenger\\Bridge\\Amqp\\' => 40,
+            'Symfony\\Component\\Messenger\\' => 28,
             'Symfony\\Component\\Mailer\\' => 25,
             'Symfony\\Component\\HttpKernel\\' => 29,
             'Symfony\\Component\\HttpFoundation\\' => 33,
@@ -91,6 +95,8 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
         'R' => 
         array (
             'Runtime\\FrankenPhpSymfony\\' => 26,
+            'React\\Promise\\' => 14,
+            'React\\EventLoop\\' => 16,
         ),
         'P' => 
         array (
@@ -117,8 +123,16 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
             'Lcobucci\\JWT\\' => 13,
             'Lcobucci\\Clock\\' => 15,
         ),
+        'I' => 
+        array (
+            'Interop\\Queue\\' => 14,
+            'Interop\\Amqp\\' => 13,
+        ),
         'E' => 
         array (
+            'Enqueue\\Dsn\\' => 12,
+            'Enqueue\\AmqpTools\\' => 18,
+            'Enqueue\\AmqpBunny\\' => 18,
             'Egulias\\EmailValidator\\' => 23,
         ),
         'D' => 
@@ -138,6 +152,10 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
             'Doctrine\\Bundle\\MigrationsBundle\\' => 33,
             'Doctrine\\Bundle\\DoctrineBundle\\' => 31,
         ),
+        'B' => 
+        array (
+            'Bunny\\' => 6,
+        ),
         'A' => 
         array (
             'App\\Tests\\' => 10,
@@ -148,9 +166,9 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
     public static $prefixDirsPsr4 = array (
         'phpDocumentor\\Reflection\\' => 
         array (
-            0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
-            1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
-            2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+            0 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
         ),
         'Webmozart\\Assert\\' => 
         array (
@@ -232,6 +250,10 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
         array (
             0 => __DIR__ . '/..' . '/symfony/stopwatch',
         ),
+        'Symfony\\Component\\Serializer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/serializer',
+        ),
         'Symfony\\Component\\Security\\Http\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/security-http',
@@ -275,6 +297,14 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
         'Symfony\\Component\\Mime\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/mime',
+        ),
+        'Symfony\\Component\\Messenger\\Bridge\\Amqp\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/amqp-messenger',
+        ),
+        'Symfony\\Component\\Messenger\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/messenger',
         ),
         'Symfony\\Component\\Mailer\\' => 
         array (
@@ -364,6 +394,14 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
         array (
             0 => __DIR__ . '/..' . '/runtime/frankenphp-symfony/src',
         ),
+        'React\\Promise\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/promise/src',
+        ),
+        'React\\EventLoop\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/event-loop/src',
+        ),
         'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
@@ -415,6 +453,26 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
         'Lcobucci\\Clock\\' => 
         array (
             0 => __DIR__ . '/..' . '/lcobucci/clock/src',
+        ),
+        'Interop\\Queue\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/queue-interop/queue-interop/src',
+        ),
+        'Interop\\Amqp\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/queue-interop/amqp-interop/src',
+        ),
+        'Enqueue\\Dsn\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/enqueue/dsn',
+        ),
+        'Enqueue\\AmqpTools\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/enqueue/amqp-tools',
+        ),
+        'Enqueue\\AmqpBunny\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/enqueue/amqp-bunny',
         ),
         'Egulias\\EmailValidator\\' => 
         array (
@@ -475,6 +533,10 @@ class ComposerStaticInit2664368be95a9e79c3187d6d8fb79b79
         'Doctrine\\Bundle\\DoctrineBundle\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/doctrine-bundle/src',
+        ),
+        'Bunny\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/bunny/bunny/src/Bunny',
         ),
         'App\\Tests\\' => 
         array (

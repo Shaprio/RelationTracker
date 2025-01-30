@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	file \
 	gettext \
 	git \
+    librabbitmq-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
@@ -31,6 +32,7 @@ RUN set -eux; \
 		intl \
 		opcache \
 		zip \
+        amqp \
 	;
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
@@ -95,3 +97,5 @@ RUN set -eux; \
 	composer dump-env prod; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
+
+

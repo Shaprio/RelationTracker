@@ -66,7 +66,17 @@ services:
             start_period: 60s
         volumes:
             - database_data:/var/lib/postgresql/data:rw
-            # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+    
+    rabbitmq:
+        image: "rabbitmq:3-management"
+        container_name: "rabbitmq"
+        restart: always
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        ports:
+            - "5672:5672"  # Port dla aplikacji
+            - "15672:15672" # Port dla panelu admina        # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
             # - ./docker/db/data:/var/lib/postgresql/data:rw
 ###< doctrine/doctrine-bundle ###
 

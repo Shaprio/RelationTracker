@@ -18,6 +18,9 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+use App\Message\SendEmailMessage;
 
 
 class SecurityController extends AbstractController
@@ -92,8 +95,8 @@ class SecurityController extends AbstractController
     public function forgotPassword(
         Request $request,
         EntityManagerInterface $entityManager,
-        MailerInterface $mailer,
-        UrlGeneratorInterface $urlGenerator // Dodajemy poprawnie URL Generator
+        MessageBusInterface $messageBus, // Messenger do kolejkowania wiadomości
+        UrlGeneratorInterface $urlGenerator
     ): Response {
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
@@ -109,17 +112,12 @@ class SecurityController extends AbstractController
                 // Generowanie pełnego URL do resetowania hasła
                 $resetUrl = $urlGenerator->generate('reset_password', ['token' => $resetToken], UrlGeneratorInterface::ABSOLUTE_URL);
 
-                // Logowanie adresu URL (opcjonalnie - do sprawdzenia, czy link jest poprawny)
-                dump($resetUrl);
-
-                // Tworzenie i wysyłanie wiadomości e-mail
-                $emailMessage = (new Email())
-                    ->from('no-reply@yourapp.com')
-                    ->to($user->getEmail())
-                    ->subject('Reset Your Password')
-                    ->html("<p>Click <a href='$resetUrl'>here</a> to reset your password.</p>");
-
-                $mailer->send($emailMessage);
+                // Wysyłka e-maila do kolejki zamiast bezpośredniego wysłania
+                $messageBus->dispatch(new SendEmailMessage(
+                    $user->getEmail(),
+                    'Reset Your Password',
+                    "<p>Click <a href='$resetUrl'>here</a> to reset your password.</p>"
+                ));
 
                 return $this->render('reset_email_sent.html.twig');
             }
@@ -129,6 +127,7 @@ class SecurityController extends AbstractController
 
         return $this->render('forgot_password.html.twig');
     }
+
 
 
     #[Route('/reset-password/{token}', name: 'reset_password', methods: ['GET', 'POST'])]
