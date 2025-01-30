@@ -42,7 +42,7 @@
 
             <div class="card">
                 <h3>Birthday Events This Month</h3>
-                <div class="scrollbox">
+                <div class="scrollbox" >
                     <div class="item-list">
                         {% for b in birthdayEvents[:5] %}
                             <div class="list-item">{{ b.title }} on {{ b.startDate|date('Y-m-d') }}</div>
@@ -55,9 +55,9 @@
 
             <div class="card">
                 <h3>Contacts to Reconnect</h3>
-                <div class="scrollbox">
+                <div class="scrollbox" >
                     <div class="item-list">
-                        {% for c in staleContacts[:5] %}
+                        {% for c in staleContacts[:3] %}
                             <div class="list-item">{{ c.name }} - Last interaction over a month ago</div>
                         {% else %}
                             <p>All contacts are up to date.</p>
@@ -68,7 +68,6 @@
         </div>
         <div class="right-column">
             <div class="calendar-box">
-                <h3>Calendar</h3>
                 <div id="calendar" class="calendar-container"></div>
             </div>
 
@@ -108,9 +107,9 @@
             let calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 themeSystem: 'bootstrap5',
-                height: 300, // 🔽 Zmniejszenie wysokości kalendarza
+                height: 394, // 🔽 Zmniejszenie wysokości kalendarza
                 headerToolbar: {
-                    left: 'prev,next today',
+                    left: 'prev,next',
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },

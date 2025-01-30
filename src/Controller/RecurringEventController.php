@@ -118,9 +118,9 @@ class RecurringEventController extends AbstractController
             'startDate' => $event->getStartDate()->format('Y-m-d'),
             'isImportant' => $event->getIsImportant(),
             'contacts' => array_map(
-                fn($contact) => [
-                    'id' => $contact->getId(),
-                    'name' => $contact->getName(),
+                fn($recurringEventContact) => [
+                    'id' => $recurringEventContact->getContact()->getId(), // Pobranie Contact z RecurringEventContact
+                    'name' => $recurringEventContact->getContact()->getName(), // Pobranie nazwy kontaktu
                 ],
                 $event->getContacts()->toArray()
             ),

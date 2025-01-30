@@ -154,11 +154,14 @@ class RecurringEvent
         return $this->contacts;
     }
 
-    public function addContact(RecurringEventContact $contact): self
+    public function addContact(Contact $contact): self
     {
-        if (!$this->contacts->contains($contact)) {
-            $this->contacts->add($contact);
-            $contact->setRecurringEvent($this);
+        $eventContact = new RecurringEventContact();
+        $eventContact->setContact($contact);
+        $eventContact->setRecurringEvent($this);
+
+        if (!$this->contacts->contains($eventContact)) {
+            $this->contacts->add($eventContact);
         }
 
         return $this;

@@ -235,4 +235,10 @@ class Contact
         $this->lastInteraction = $lastInteraction;
         return $this;
     }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
 }

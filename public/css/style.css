@@ -180,7 +180,8 @@ h2, h3, p, h1 {
     border-radius: 4px;
 }
 .scrollbox {
-    max-height: 250px; /* Ustalona wysokość, aby uniknąć zbyt długich list */
+    max-height: 250px;
+    min-height: 10px;
     overflow-y: auto;
     border: 1px solid #ddd;
     padding: 10px;
