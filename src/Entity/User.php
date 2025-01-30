@@ -39,6 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: Setting::class)]
     private ?Setting $setting = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $resetToken = null;
+
     public function __construct()
     {
         $this->recurringEvents = new ArrayCollection();
@@ -147,6 +150,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $setting->setUser($this);
         }
 
+        return $this;
+    }
+
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): self
+    {
+        $this->resetToken = $resetToken;
         return $this;
     }
 }

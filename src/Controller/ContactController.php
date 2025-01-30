@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\RecurringEvent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,7 +38,7 @@ class ContactController extends AbstractController
             $note = $request->request->get('note');
 
             if ($contactId) {
-                // Aktualizacja istniejącego kontaktu
+                // 🔄 Aktualizacja istniejącego kontaktu
                 $contact = $entityManager->getRepository(Contact::class)->find($contactId);
                 if ($contact && $contact->getUserName() === $user) {
                     $contact->setName($name);
@@ -46,10 +47,16 @@ class ContactController extends AbstractController
                     $contact->setBirthday($birthday ? new \DateTime($birthday) : null);
                     $contact->setNote($note);
                     $contact->setUpdateAt(new \DateTime());
+
+                    // 🛠 Sprawdzenie, czy istnieje `RecurringEvent` dla urodzin
+                    if ($birthday) {
+                        $this->updateOrCreateBirthdayEvent($contact, $entityManager);
+                    }
+
                     $entityManager->flush();
                 }
             } else {
-                // Tworzenie nowego kontaktu
+                // ➕ Tworzenie nowego kontaktu
                 $contact = new Contact();
                 $contact->setUserName($user);
                 $contact->setName($name);
@@ -59,8 +66,14 @@ class ContactController extends AbstractController
                 $contact->setNote($note);
                 $contact->setCreatedAt(new \DateTimeImmutable());
                 $contact->setUpdateAt(new \DateTime());
+
                 $entityManager->persist($contact);
                 $entityManager->flush();
+
+                // 🆕 Jeśli podano urodziny, tworzymy `RecurringEvent`
+                if ($birthday) {
+                    $this->updateOrCreateBirthdayEvent($contact, $entityManager);
+                }
             }
 
             return $this->redirectToRoute('friends');
@@ -72,8 +85,41 @@ class ContactController extends AbstractController
     }
 
     /**
-     * ### Webowy Endpoint do Logowania Interakcji
+     * 🛠 Aktualizuje lub tworzy `RecurringEvent` dla urodzin kontaktu.
      */
+    private function updateOrCreateBirthdayEvent(Contact $contact, EntityManagerInterface $entityManager): void
+    {
+        $birthday = $contact->getBirthday();
+        if (!$birthday) {
+            return;
+        }
+
+        $user = $contact->getUserName();
+
+        // 🔎 Sprawdzenie, czy już istnieje Recurring Event dla tych urodzin
+        $existingEvent = $entityManager->getRepository(RecurringEvent::class)->findOneBy([
+            'owner' => $user,
+            'title' => 'Birthday',
+            'startDate' => $birthday,
+        ]);
+
+        if (!$existingEvent) {
+            // 🆕 Tworzenie nowego `RecurringEvent`
+            $birthdayEvent = new RecurringEvent();
+            $birthdayEvent->setTitle('Birthday');
+            $birthdayEvent->setDescription($contact->getName() . ' - Birthday');
+            $birthdayEvent->setStartDate($birthday);
+            $birthdayEvent->setRecurrencePattern('yearly');
+            $birthdayEvent->setCreatedAt(new \DateTimeImmutable());
+            $birthdayEvent->setUpdatedAt(new \DateTime());
+            $birthdayEvent->setOwner($user);
+            $birthdayEvent->addContact($contact);
+
+            $entityManager->persist($birthdayEvent);
+            $entityManager->flush();
+        }
+    }
+
     #[Route('/friends/interact', name: 'log_interaction', methods: ['POST'])]
     public function logInteraction(Request $request, EntityManagerInterface $entityManager): Response
     {

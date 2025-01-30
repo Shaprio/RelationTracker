@@ -3,9 +3,9 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.53">
     <root id="1">
       <DateStyle>mdy</DateStyle>
-      <IntrospectionStateNumber>1237</IntrospectionStateNumber>
+      <IntrospectionStateNumber>1247</IntrospectionStateNumber>
       <ServerVersion>16.6</ServerVersion>
-      <StartupTime>1738143769</StartupTime>
+      <StartupTime>1738228211</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -801,7 +801,7 @@ false posixrules
 13255||10|C|G
 13255||-9223372036854775808|U|G
 13255||10|U|G</Grants>
-      <IntrospectionStateNumber>1237</IntrospectionStateNumber>
+      <IntrospectionStateNumber>1247</IntrospectionStateNumber>
       <ObjectId>16384</ObjectId>
       <OwnerName>app</OwnerName>
     </database>
@@ -4225,8 +4225,8 @@ false posixrules
     <schema id="264" parent="2" name="public">
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <IntrospectionStateNumber>1237</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2025-01-29.18:14:28</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>1247</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2025-01-30.10:11:05</LastIntrospectionLocalTimestamp>
       <ObjectId>2200</ObjectId>
       <StateNumber>524</StateNumber>
       <OwnerName>pg_database_owner</OwnerName>
@@ -4563,16 +4563,18 @@ false posixrules
     </column>
     <column id="311" parent="276" name="created_at">
       <Comment>(DC2Type:datetime_immutable)</Comment>
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>6</Position>
-      <StateNumber>1003</StateNumber>
+      <StateNumber>1238</StateNumber>
       <StoredType>timestamp(0)|0s</StoredType>
       <TypeId>1114</TypeId>
     </column>
     <column id="312" parent="276" name="update_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>7</Position>
-      <StateNumber>1003</StateNumber>
+      <StateNumber>1238</StateNumber>
       <StoredType>timestamp(0)|0s</StoredType>
       <TypeId>1114</TypeId>
     </column>
