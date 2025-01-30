@@ -5,39 +5,22 @@
     Dashboard - Main Page
 {% endblock %}
 
-{% block content %}
+{% block stylesheets %}
 
-    <!-- Góra: powitanie + przycisk tworzenia eventu + statystyki -->
+
+{% endblock %}
+
+{% block content %}
     <div class="top-bar">
         <div>
             <div class="welcome-box">
                 Hello, {{ app.user.name }}! It's good to see you again.
             </div>
-            <div class="stats">
-                <div class="stat-box">
-                    <h2>{{ eventsCountThisMonth|default('0') }}</h2>
-                    <p>Events this month</p>
-                </div>
-                <div class="stat-box">
-                    <h2>{{ organizerCount|default('0') }}</h2>
-                    <p>Organizer</p>
-                </div>
-                <div class="stat-box">
-                    <h2>{{ guestCount|default('0') }}</h2>
-                    <p>Guest</p>
-                </div>
-            </div>
         </div>
-
-        <!-- Przycisk do tworzenia eventu (Placeholder) -->
-        <button class="create-event-btn">Create Event</button>
     </div>
 
-    <!-- Sekcja główna: lewa kolumna (kafelki) i prawa kolumna (calendar & today events) -->
     <div class="main-sections">
-        <!-- Lewa kolumna -->
         <div class="left-column">
-            <!-- Kafelek: Wydarzenia w tym tygodniu -->
             <div class="card">
                 <h3>Events This Week</h3>
                 <div class="item-list">
@@ -46,20 +29,8 @@
                     {% else %}
                         <p>No events found for this week.</p>
                     {% endfor %}
-
-                    {% for r in recurringThisWeek %}
-                        <div class="list-item">{{ r.title }} — {{ r.startDate|date('Y-m-d') }}</div>
-                    {% else %}
-                        {#
-                        Uwaga: Drugi blok "else" w jednej pętli jest niedozwolony w
-                        Twigu. Lepiej scalić w jedną listę, lub zrobić drugą pętlę
-                        z innym wcięciem logicznym.
-                        #}
-                    {% endfor %}
                 </div>
             </div>
-
-            <!-- Kafelek: Birthday Events This Month -->
             <div class="card">
                 <h3>Birthday Events This Month</h3>
                 <div class="item-list">
@@ -70,8 +41,6 @@
                     {% endfor %}
                 </div>
             </div>
-
-            <!-- Kafelek: Contacts to Reconnect -->
             <div class="card">
                 <h3>Contacts to Reconnect</h3>
                 <div class="item-list">
@@ -83,24 +52,38 @@
                 </div>
             </div>
         </div>
-
-        <!-- Prawa kolumna -->
         <div class="right-column">
-            <!-- Kalendarz (placeholder) -->
             <div class="calendar-box">
-                <h3>April 11, 2024</h3>
-                <!-- Tu można wstawić mini-kalendarz JS/HTML lub cokolwiek planujesz -->
-                <p>(Placeholder for a calendar widget)</p>
-            </div>
-
+                <h3>Calendar</h3>
+                <div id="calendar"></div>
             </div>
         </div>
     </div>
-
 {% endblock %}
 
-
 {% block javascripts %}
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let calendarEl = document.getElementById('calendar');
+            if (!calendarEl) {
+                console.error('Calendar element not found');
+                return;
+            }
+
+            let calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                themeSystem: 'bootstrap5', // Dla Bootstrap 5
+                headerToolbar: {
+                    left: '',
+                    center: 'title',
+                    right: ''
+                },
+
+            });
+
+            calendar.render();
+        });
+
     </script>
 {% endblock %}

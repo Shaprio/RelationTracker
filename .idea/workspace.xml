@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="beecf254-77b6-4a86-88f2-8117916fe693" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/109c5bb0-19f3-4d9f-825f-32cef2c93795.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/109c5bb0-19f3-4d9f-825f-32cef2c93795.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/109c5bb0-19f3-4d9f-825f-32cef2c93795/storage_v2/_src_/database/app.IXoBAA/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/109c5bb0-19f3-4d9f-825f-32cef2c93795/storage_v2/_src_/database/app.IXoBAA/schema/public.abK9xQ.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/MeetingController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/MeetingController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Event.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Event.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/meetings.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/meetings.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/mainPage.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/mainPage.html.twig" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
