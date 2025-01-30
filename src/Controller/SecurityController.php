@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +15,9 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use OpenApi\Attributes as OA;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
 class SecurityController extends AbstractController
@@ -83,7 +87,73 @@ class SecurityController extends AbstractController
         return $this->json(['token' => $token]);
     }
 
-    // **API Register**
+
+    #[Route('/forgot-password', name: 'forgot_password', methods: ['GET', 'POST'])]
+    public function forgotPassword(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer,
+        UrlGeneratorInterface $urlGenerator // Dodajemy poprawnie URL Generator
+    ): Response {
+        if ($request->isMethod('POST')) {
+            $email = $request->request->get('email');
+
+            $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+            if ($user) {
+                // Generowanie tokena resetującego
+                $resetToken = bin2hex(random_bytes(32));
+                $user->setResetToken($resetToken);
+                $entityManager->flush();
+
+                // Generowanie pełnego URL do resetowania hasła
+                $resetUrl = $urlGenerator->generate('reset_password', ['token' => $resetToken], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                // Logowanie adresu URL (opcjonalnie - do sprawdzenia, czy link jest poprawny)
+                dump($resetUrl);
+
+                // Tworzenie i wysyłanie wiadomości e-mail
+                $emailMessage = (new Email())
+                    ->from('no-reply@yourapp.com')
+                    ->to($user->getEmail())
+                    ->subject('Reset Your Password')
+                    ->html("<p>Click <a href='$resetUrl'>here</a> to reset your password.</p>");
+
+                $mailer->send($emailMessage);
+
+                return $this->render('reset_email_sent.html.twig');
+            }
+
+            $this->addFlash('error', 'Email not found.');
+        }
+
+        return $this->render('forgot_password.html.twig');
+    }
+
+
+    #[Route('/reset-password/{token}', name: 'reset_password', methods: ['GET', 'POST'])]
+    public function resetPassword(Request $request, string $token, EntityManagerInterface $entityManager, userPasswordHasherInterface $passwordEncoder): Response
+    {
+        $user = $entityManager->getRepository(User::class)->findOneBy(['resetToken' => $token]);
+
+        if (!$user) {
+            throw $this->createNotFoundException('Invalid or expired reset token.');
+        }
+
+        if ($request->isMethod('POST')) {
+            $newPassword = $request->request->get('password');
+            $user->setPassword($passwordEncoder->hashPassword($user, $newPassword));
+            $user->setResetToken(null); // Usunięcie tokena resetującego po zmianie hasła
+            $entityManager->flush();
+
+            return $this->redirectToRoute('login');
+        }
+
+        return $this->render('reset_password.html.twig', ['token' => $token]);
+    }
+
+
+
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
     #[OA\Post(
         path: '/api/register',
@@ -281,6 +351,6 @@ class SecurityController extends AbstractController
     public function logoutWeb(): void
     {
         // Ten kod nigdy nie zostanie wywołany, ponieważ wylogowanie jest przechwytywane przez firewall.
-        throw new \Exception('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        throw new Exception('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 }
