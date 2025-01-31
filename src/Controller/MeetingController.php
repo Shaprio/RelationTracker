@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use DateTime;
+use DateTimeImmutable;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +22,7 @@ class MeetingController extends AbstractController
     #[Route('/meetings', name: 'meetings', methods: ['GET', 'POST'])]
     public function meetings(Request $request, EntityManagerInterface $entityManager): Response
     {
+        /** @var User|null $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('login');
@@ -46,7 +50,7 @@ class MeetingController extends AbstractController
                     $event->setTitle($title)
                         ->setDescription($description)
                         ->setDate($dateObject)
-                        ->setUpdateAt(new \DateTime());
+                        ->setUpdateAt(new DateTime());
 
                     foreach ($event->getContact() as $eventContact) {
                         $entityManager->remove($eventContact);
@@ -69,8 +73,8 @@ class MeetingController extends AbstractController
                     ->setTitle($title)
                     ->setDescription($description)
                     ->setDate($dateObject)
-                    ->setCreatedAt(new \DateTimeImmutable())
-                    ->setUpdateAt(new \DateTime());
+                    ->setCreatedAt(new DateTimeImmutable())
+                    ->setUpdateAt(new DateTime());
 
                 $entityManager->persist($event);
 
@@ -94,28 +98,28 @@ class MeetingController extends AbstractController
             'contacts' => $contacts,
         ]);
     }
-    private function parseDate(?string $dateString): ?\DateTime
+    private function parseDate(?string $dateString): ?DateTime
     {
         if (!$dateString) {
             return null;
         }
 
         // Obsługa formatu "Y-m-d H:i:s"
-        $dateObject = \DateTime::createFromFormat('Y-m-d H:i:s', $dateString);
+        $dateObject = DateTime::createFromFormat('Y-m-d H:i:s', $dateString);
         if ($dateObject) {
             return $dateObject;
         }
 
         // Obsługa formatu ISO 8601 "Y-m-d\TH:i"
-        $dateObject = \DateTime::createFromFormat('Y-m-d\TH:i', $dateString);
+        $dateObject = DateTime::createFromFormat('Y-m-d\TH:i', $dateString);
         if ($dateObject) {
             return $dateObject;
         }
 
         // Obsługa standardowego formatu PHP DateTime
         try {
-            return new \DateTime($dateString);
-        } catch (\Exception $e) {
+            return new DateTime($dateString);
+        } catch (Exception $e) {
             return null;
         }
     }
@@ -226,9 +230,9 @@ class MeetingController extends AbstractController
         $event->setUserE($user);
         $event->setTitle($data['title']);
         $event->setDescription($data['description']);
-        $event->setDate(new \DateTime($data['date']));
-        $event->setCreatedAt(new \DateTimeImmutable());
-        $event->setUpdateAt(new \DateTime());
+        $event->setDate(new DateTime($data['date']));
+        $event->setCreatedAt(new DateTimeImmutable());
+        $event->setUpdateAt(new DateTime());
 
         $entityManager->persist($event);
 

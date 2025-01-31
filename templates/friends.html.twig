@@ -35,13 +35,13 @@
             <form method="POST" action="/friends">
                 <input type="hidden" name="action" value="save_contact">
                 <input type="hidden" name="contact_id" id="contactId">
-                <input type="text" name="name" id="contactName" placeholder="Name" required>
-                <input type="email" name="email" id="contactEmail" placeholder="Email">
-                <input type="text" name="phone" id="contactPhone" placeholder="Phone">
-                <input type="text" name="address" id="contactAddress" placeholder="Address">
-                <input type="date" name="birthday" id="contactBirthday">
-                <input type="text" name="relationship" id="contactRelationship" placeholder="Relationship">
-                <textarea name="note" id="contactNote" placeholder="Note"></textarea>
+                <label for="contactName"></label><input type="text" name="name" id="contactName" placeholder="Name" required>
+                <label for="contactEmail"></label><input type="email" name="email" id="contactEmail" placeholder="Email">
+                <label for="contactPhone"></label><input type="text" name="phone" id="contactPhone" placeholder="Phone">
+                <label for="contactAddress"></label><input type="text" name="address" id="contactAddress" placeholder="Address">
+                <label for="contactBirthday"></label><input type="date" name="birthday" id="contactBirthday">
+                <label for="contactRelationship"></label><input type="text" name="relationship" id="contactRelationship" placeholder="Relationship">
+                <label for="contactNote"></label><textarea name="note" id="contactNote" placeholder="Note"></textarea>
                 <button type="submit">Save Contact</button>
             </form>
         </div>
@@ -61,7 +61,7 @@
             <form method="POST" action="/friends/interact">
                 <input type="hidden" name="contact_id" id="interactionContactId">
                 <label for="initiatedBy">Initiated By:</label>
-                <select name="initiatedBy" id="interactionInitiatedBy">
+                <label for="interactionInitiatedBy"></label><select name="initiatedBy" id="interactionInitiatedBy">
                     <option value="self">Self</option>
                     <option value="friend">Friend</option>
                 </select>
