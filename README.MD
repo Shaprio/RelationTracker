@@ -142,7 +142,7 @@ RelationTracker został zaprojektowany zgodnie z MVC (**Model-View-Controller**)
 
 ![SIGNUP](screenshots/SIGNUP.png)
 ![Login](screenshots/Login.png)
-![JWTToken](screenshots/JWTToken.png)
+![JWTToken](screenshots/JWTTOKEN.png)
 
 ### 2. Dashboard – Główna strona użytkownika
 ![Dashboard](screenshots/Dashboard.png)
