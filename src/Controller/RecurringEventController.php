@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use DateTime;
+use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +23,7 @@ class RecurringEventController extends AbstractController
     #[Route('/recurring-events', name: 'recurring_events', methods: ['GET', 'POST'])]
     public function recurringEvents(Request $request, EntityManagerInterface $entityManager): Response
     {
+        /** @var User|null $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('login');
@@ -48,9 +51,9 @@ class RecurringEventController extends AbstractController
                 $event->setTitle($title)
                     ->setDescription($description)
                     ->setRecurrencePattern($recurrencePattern)
-                    ->setStartDate(new \DateTime($startDate))
-                    ->setEndDate($endDate ? new \DateTime($endDate) : null)
-                    ->setUpdatedAt(new \DateTime());
+                    ->setStartDate(new DateTime($startDate))
+                    ->setEndDate($endDate ? new DateTime($endDate) : null)
+                    ->setUpdatedAt(new DateTime());
 
                 // Usunięcie poprzednich kontaktów
                 foreach ($event->getContacts() as $existingContact) {
@@ -73,11 +76,11 @@ class RecurringEventController extends AbstractController
                 $event->setTitle($title)
                     ->setDescription($description)
                     ->setRecurrencePattern($recurrencePattern)
-                    ->setStartDate(new \DateTime($startDate))
-                    ->setEndDate($endDate ? new \DateTime($endDate) : null)
+                    ->setStartDate(new DateTime($startDate))
+                    ->setEndDate($endDate ? new DateTime($endDate) : null)
                     ->setOwner($user)
-                    ->setCreatedAt(new \DateTimeImmutable())
-                    ->setUpdatedAt(new \DateTime());
+                    ->setCreatedAt(new DateTimeImmutable())
+                    ->setUpdatedAt(new DateTime());
 
                 $entityManager->persist($event);
 

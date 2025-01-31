@@ -12,7 +12,7 @@ use App\Entity\User;
 use App\Entity\Contact;
 use App\Entity\Event;
 use App\Entity\RecurringEvent;
-use App\Entity\Interaction;
+
 
 class StatisticsController extends AbstractController
 {
@@ -148,6 +148,7 @@ class StatisticsController extends AbstractController
     )]
     public function apiStatistics(EntityManagerInterface $entityManager): JsonResponse
     {
+        /** @var User|null $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);

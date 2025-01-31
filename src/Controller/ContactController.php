@@ -3,22 +3,20 @@
 namespace App\Controller;
 
 use App\Entity\RecurringEvent;
+use DateTime;
+use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Entity\User;
 use App\Entity\Contact;
 use App\Entity\Interaction;
 use OpenApi\Attributes as OA;
 
 class ContactController extends AbstractController
 {
-    /**
-     * ### Webowy Endpoint do Wyświetlania i Dodawania Kontaktów
-     */
     #[Route('/friends', name: 'friends', methods: ['GET', 'POST'])]
     public function friends(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -38,17 +36,15 @@ class ContactController extends AbstractController
             $note = $request->request->get('note');
 
             if ($contactId) {
-                // 🔄 Aktualizacja istniejącego kontaktu
                 $contact = $entityManager->getRepository(Contact::class)->find($contactId);
                 if ($contact && $contact->getUserName() === $user) {
                     $contact->setName($name);
                     $contact->setEmailC($email);
                     $contact->setPhone($phone);
-                    $contact->setBirthday($birthday ? new \DateTime($birthday) : null);
+                    $contact->setBirthday($birthday ? new DateTime($birthday) : null);
                     $contact->setNote($note);
-                    $contact->setUpdateAt(new \DateTime());
+                    $contact->setUpdateAt(new DateTime());
 
-                    // 🛠 Sprawdzenie, czy istnieje `RecurringEvent` dla urodzin
                     if ($birthday) {
                         $this->updateOrCreateBirthdayEvent($contact, $entityManager);
                     }
@@ -56,21 +52,19 @@ class ContactController extends AbstractController
                     $entityManager->flush();
                 }
             } else {
-                // ➕ Tworzenie nowego kontaktu
                 $contact = new Contact();
                 $contact->setUserName($user);
                 $contact->setName($name);
                 $contact->setEmailC($email);
                 $contact->setPhone($phone);
-                $contact->setBirthday($birthday ? new \DateTime($birthday) : null);
+                $contact->setBirthday($birthday ? new DateTime($birthday) : null);
                 $contact->setNote($note);
-                $contact->setCreatedAt(new \DateTimeImmutable());
-                $contact->setUpdateAt(new \DateTime());
+                $contact->setCreatedAt(new DateTimeImmutable());
+                $contact->setUpdateAt(new DateTime());
 
                 $entityManager->persist($contact);
                 $entityManager->flush();
 
-                // 🆕 Jeśli podano urodziny, tworzymy `RecurringEvent`
                 if ($birthday) {
                     $this->updateOrCreateBirthdayEvent($contact, $entityManager);
                 }
@@ -83,10 +77,6 @@ class ContactController extends AbstractController
             'contacts' => $contacts,
         ]);
     }
-
-    /**
-     * 🛠 Aktualizuje lub tworzy `RecurringEvent` dla urodzin kontaktu.
-     */
     private function updateOrCreateBirthdayEvent(Contact $contact, EntityManagerInterface $entityManager): void
     {
         $birthday = $contact->getBirthday();
@@ -96,7 +86,6 @@ class ContactController extends AbstractController
 
         $user = $contact->getUserName();
 
-        // 🔎 Sprawdzenie, czy już istnieje Recurring Event dla tych urodzin
         $existingEvent = $entityManager->getRepository(RecurringEvent::class)->findOneBy([
             'owner' => $user,
             'title' => 'Birthday',
@@ -104,14 +93,13 @@ class ContactController extends AbstractController
         ]);
 
         if (!$existingEvent) {
-            // 🆕 Tworzenie nowego `RecurringEvent`
             $birthdayEvent = new RecurringEvent();
             $birthdayEvent->setTitle('Birthday');
             $birthdayEvent->setDescription($contact->getName() . ' - Birthday');
             $birthdayEvent->setStartDate($birthday);
             $birthdayEvent->setRecurrencePattern('yearly');
-            $birthdayEvent->setCreatedAt(new \DateTimeImmutable());
-            $birthdayEvent->setUpdatedAt(new \DateTime());
+            $birthdayEvent->setCreatedAt(new DateTimeImmutable());
+            $birthdayEvent->setUpdatedAt(new DateTime());
             $birthdayEvent->setOwner($user);
             $birthdayEvent->addContact($contact);
 
@@ -129,18 +117,17 @@ class ContactController extends AbstractController
         }
 
         $contactId = $request->request->get('contact_id');
-        $initiatedBy = $request->request->get('initiatedBy'); // 'self' lub 'friend'
+        $initiatedBy = $request->request->get('initiatedBy');
 
         $contact = $entityManager->getRepository(Contact::class)->find($contactId);
 
         if ($contact && $contact->getUserName() === $user) {
             $interaction = new Interaction();
-            $interactionDate = new \DateTimeImmutable();
+            $interactionDate = new DateTimeImmutable();
             $interaction->setContact($contact);
             $interaction->setInitiatedBy($initiatedBy);
             $interaction->setInteractionDate($interactionDate);
 
-            // Aktualizacja pola lastInteraction
             $contact->setLastInteraction($interactionDate);
 
             $entityManager->persist($interaction);
@@ -153,10 +140,6 @@ class ContactController extends AbstractController
 
         return $this->redirectToRoute('friends');
     }
-
-    /**
-     * ### Webowy Endpoint do Wyświetlania Szczegółów Kontaktu
-     */
     #[Route('/friends/{id}/details', name: 'contact_details', methods: ['GET'])]
     public function contactDetails(int $id, EntityManagerInterface $entityManager): Response
     {
@@ -181,10 +164,6 @@ class ContactController extends AbstractController
             'note' => $contact->getNote(),
         ]);
     }
-
-    /**
-     * ### Webowy Endpoint do Usuwania Kontaktu
-     */
     #[Route('/friends/{id}/delete', name: 'delete_contact', methods: ['POST'])]
     public function deleteContact(int $id, EntityManagerInterface $entityManager): Response
     {
@@ -204,17 +183,12 @@ class ContactController extends AbstractController
 
         return $this->redirectToRoute('friends');
     }
-
-    // ### API Endpointy ###
-
-    /**
-     * ### API Endpoint do Wyświetlania i Dodawania Kontaktów
-     */
     #[Route('/api/friends', name: 'api_friends', methods: ['GET', 'POST'])]
     #[OA\Get(
         path: '/api/friends',
-        summary: 'Get Friends List',
         description: 'Retrieve a list of user\'s contacts.',
+        summary: 'Get Friends List',
+        security: [['Bearer' => []]],
         responses: [
             new OA\Response(
                 response: 200,
@@ -233,13 +207,13 @@ class ContactController extends AbstractController
                     ]
                 )
             )
-        ],
-        security: [['Bearer' => []]]
+        ]
     )]
     #[OA\Post(
         path: '/api/friends',
-        summary: 'Create a New Friend',
         description: 'Create a new contact.',
+        summary: 'Create a New Friend',
+        security: [['Bearer' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -281,8 +255,7 @@ class ContactController extends AbstractController
                     ]
                 )
             )
-        ],
-        security: [['Bearer' => []]]
+        ]
     )]
     public function apiFriends(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -315,10 +288,10 @@ class ContactController extends AbstractController
             $contact->setName($name);
             $contact->setEmailC($email);
             $contact->setPhone($phone);
-            $contact->setBirthday($birthday ? new \DateTime($birthday) : null);
+            $contact->setBirthday($birthday ? new DateTime($birthday) : null);
             $contact->setNote($note);
-            $contact->setCreatedAt(new \DateTimeImmutable());
-            $contact->setUpdateAt(new \DateTime());
+            $contact->setCreatedAt(new DateTimeImmutable());
+            $contact->setUpdateAt(new DateTime());
 
             // Walidacja encji Contact
             $errors = $this->get('validator')->validate($contact);
@@ -353,15 +326,12 @@ class ContactController extends AbstractController
 
         return $this->json($data, Response::HTTP_OK);
     }
-
-    /**
-     * ### API Endpoint do Logowania Interakcji
-     */
     #[Route('/api/friends/interact', name: 'api_log_interaction', methods: ['POST'])]
     #[OA\Post(
         path: '/api/friends/interact',
-        summary: 'Log Interaction',
         description: 'Logs an interaction with a contact.',
+        summary: 'Log Interaction',
+        security: [['Bearer' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -400,8 +370,7 @@ class ContactController extends AbstractController
                     ]
                 )
             )
-        ],
-        security: [['Bearer' => []]]
+        ]
     )]
     public function apiLogInteraction(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -422,7 +391,7 @@ class ContactController extends AbstractController
 
         if ($contact && $contact->getUserName() === $user) {
             $interaction = new Interaction();
-            $interactionDate = new \DateTimeImmutable();
+            $interactionDate = new DateTimeImmutable();
             $interaction->setContact($contact);
             $interaction->setInitiatedBy($initiatedBy);
             $interaction->setInteractionDate($interactionDate);
@@ -438,22 +407,19 @@ class ContactController extends AbstractController
             return $this->json(['error' => 'Contact not found or unauthorized.'], Response::HTTP_NOT_FOUND);
         }
     }
-
-    /**
-     * ### API Endpoint do Wyświetlania Szczegółów Kontaktu
-     */
     #[Route('/api/friends/{id}/details', name: 'api_contact_details', methods: ['GET'])]
     #[OA\Get(
         path: '/api/friends/{id}/details',
-        summary: 'Get Contact Details',
         description: 'Retrieve detailed information about a specific contact.',
+        summary: 'Get Contact Details',
+        security: [['Bearer' => []]],
         parameters: [
             new OA\Parameter(
                 name: 'id',
+                description: 'ID of the contact',
                 in: 'path',
                 required: true,
-                schema: new OA\Schema(type: 'integer'),
-                description: 'ID of the contact'
+                schema: new OA\Schema(type: 'integer')
             )
         ],
         responses: [
@@ -491,8 +457,7 @@ class ContactController extends AbstractController
                     ]
                 )
             )
-        ],
-        security: [['Bearer' => []]]
+        ]
     )]
     public function apiContactDetails(int $id, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -517,22 +482,19 @@ class ContactController extends AbstractController
             'note' => $contact->getNote(),
         ], Response::HTTP_OK);
     }
-
-    /**
-     * ### API Endpoint do Usuwania Kontaktu
-     */
     #[Route('/api/friends/{id}/delete', name: 'api_delete_contact', methods: ['POST'])]
     #[OA\Post(
         path: '/api/friends/{id}/delete',
-        summary: 'Delete Contact',
         description: 'Deletes a specific contact.',
+        summary: 'Delete Contact',
+        security: [['Bearer' => []]],
         parameters: [
             new OA\Parameter(
                 name: 'id',
+                description: 'ID of the contact to delete',
                 in: 'path',
                 required: true,
-                schema: new OA\Schema(type: 'integer'),
-                description: 'ID of the contact to delete'
+                schema: new OA\Schema(type: 'integer')
             )
         ],
         responses: [
@@ -563,8 +525,7 @@ class ContactController extends AbstractController
                     ]
                 )
             )
-        ],
-        security: [['Bearer' => []]]
+        ]
     )]
     public function apiDeleteContact(int $id, EntityManagerInterface $entityManager): JsonResponse
     {
