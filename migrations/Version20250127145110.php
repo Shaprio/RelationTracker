@@ -7,26 +7,34 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20250127145110 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Safely drop contact.name if it exists (PostgreSQL)';
     }
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE contact DROP name');
+        // Upewnij się, że to Postgres (żeby IF EXISTS było wspierane tak jak oczekujemy)
+        $this->abortIf(
+            $this->connection->getDatabasePlatform()->getName() !== 'postgresql',
+            'Migration can only be executed safely on PostgreSQL.'
+        );
+
+        // Idempotentny drop kolumny
+        $this->addSql('ALTER TABLE contact DROP COLUMN IF EXISTS name');
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE SCHEMA public');
-        $this->addSql('ALTER TABLE contact ADD name VARCHAR(255) NOT NULL');
+        $this->abortIf(
+            $this->connection->getDatabasePlatform()->getName() !== 'postgresql',
+            'Migration can only be executed safely on PostgreSQL.'
+        );
+
+        // Jeżeli chcesz NOT NULL, to rozważ domyślną wartość dla istniejących rekordów.
+        // Najbezpieczniej: pozwól NULL (albo ustaw DEFAULT i potem ustaw NOT NULL).
+        $this->addSql('ALTER TABLE contact ADD COLUMN IF NOT EXISTS name VARCHAR(255)');
     }
 }
