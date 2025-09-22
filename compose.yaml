@@ -79,7 +79,14 @@ services:
             - "15672:15672" # Port dla panelu admina        # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
             # - ./docker/db/data:/var/lib/postgresql/data:rw
 ###< doctrine/doctrine-bundle ###
-
+    mailer:
+        image: axllent/mailpit
+        ports:
+            - "1025"
+            - "8025"
+        environment:
+            MP_SMTP_AUTH_ACCEPT_ANY: 1
+            MP_SMTP_AUTH_ALLOW_INSECURE: 1
 volumes:
     caddy_data:
     caddy_config:

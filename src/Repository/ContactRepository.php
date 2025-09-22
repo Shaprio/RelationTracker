@@ -22,7 +22,7 @@ class ContactRepository extends ServiceEntityRepository
         $cutoff = (new \DateTime())->modify("-{$days} days");
 
         return $this->createQueryBuilder('c')
-            ->andWhere('c.userName = :user') // lub 'owner' -> dopasuj do nazwy w encji
+            ->andWhere('c.userName = :user')
             ->andWhere('c.lastInteraction < :cutoff OR c.lastInteraction IS NULL')
             ->setParameter('user', $user)
             ->setParameter('cutoff', $cutoff)

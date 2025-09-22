@@ -1,10 +1,48 @@
-# Production environment override
+# compose.prod.yaml — wersja "ma działać"
 services:
   php:
     build:
       context: .
       target: frankenphp_prod
+    image: ${IMAGES_PREFIX:-}app-php:prod
+    restart: unless-stopped
     environment:
-      APP_SECRET: ${APP_SECRET}
-      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+      SERVER_NAME: "localhost"
+      APP_ENV: prod
+      APP_DEBUG: 0
+      # jeżeli nie podasz APP_SECRET z .env/.env.prod — użyje domyślnego
+      APP_SECRET: ${APP_SECRET:-insecure-temp-app-secret-change-me}
+      # użyj hosta 'database' (nazwa usługi z compose), NIE 127.0.0.1
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-ChangeMe}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-16}&charset=${POSTGRES_CHARSET:-utf8}}
+      # Mercure – dajemy twarde domyślne, żeby nie było warningów
+      MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
+      MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://localhost/.well-known/mercure}
+      CADDY_MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-dev-mercure-secret-change-me}
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-dev-mercure-secret-change-me}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-dev-mercure-secret-change-me}
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-dev-mercure-secret-change-me}
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    ports:
+      - "80:80"    # HTTP
+      - "443:443"  # HTTPS (FrankenPHP/Caddy)
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+  # tylko żeby nadpisać porty (zostaw AMQP; panel www w prod też zostawiamy „na siłę” wyłączony/otwarty wg potrzeby)
+  rabbitmq:
+    ports:
+      - "5672:5672"   # AMQP dla aplikacji
+      # - "15672:15672"  # odkomentuj jeśli chcesz panel www RabbitMQ
+  database:
+    ports:
+      - "5432:5432"
+# wolumeny są w compose.yaml; nie trzeba duplikować,
+# ale zostawiamy deklaracje jeśli bazowy plik ich nie ma.
+volumes:
+  caddy_data:
+  caddy_config:

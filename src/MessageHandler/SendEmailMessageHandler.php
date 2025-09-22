@@ -11,11 +11,9 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 #[AsMessageHandler]
 class SendEmailMessageHandler {
     private MailerInterface $mailer;
-
     public function __construct(MailerInterface $mailer) {
         $this->mailer = $mailer;
     }
-
     public function __invoke(SendEmailMessage $message): void {
         try {
             $email = (new Email())

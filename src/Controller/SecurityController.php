@@ -266,9 +266,6 @@ class SecurityController extends AbstractController
     )]
     public function apiLogout(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        // Implement token invalidation logic here (e.g., add token to blacklist)
-        // Currently, JWT is stateless and cannot be invalidated server-side without additional logic.
-
         return $this->json(['message' => 'Logged out successfully.'], 200);
     }
 
